@@ -1,0 +1,81 @@
+# ============================================================
+# Root .gitignore for SistemDispensasi
+# Covers: backend (Laravel) and frontend (Vue/Vite)
+# ============================================================
+
+# ── Environment & Secrets ────────────────────────────────────
+.env
+.env.local
+.env.backup
+.env.production
+.env.*.local
+*.key
+auth.json
+
+# ── Dependencies ─────────────────────────────────────────────
+node_modules/
+backend/vendor/
+
+# ── Laravel Backend ──────────────────────────────────────────
+backend/.phpunit.cache
+backend/public/build/
+backend/public/hot
+backend/public/storage
+backend/storage/*.key
+backend/storage/logs/*
+!backend/storage/logs/.gitignore
+backend/storage/app/*
+!backend/storage/app/public/
+!backend/storage/app/.gitignore
+backend/storage/framework/cache/data/*
+!backend/storage/framework/cache/data/.gitignore
+backend/storage/framework/sessions/*
+!backend/storage/framework/sessions/.gitignore
+backend/storage/framework/views/*
+!backend/storage/framework/views/.gitignore
+backend/storage/framework/testing/*
+!backend/storage/framework/testing/.gitignore
+backend/bootstrap/cache/*
+!backend/bootstrap/cache/.gitignore
+backend/database/*.sqlite
+backend/database/*.sqlite-journal
+Homestead.json
+Homestead.yaml
+
+# ── Frontend (Vue / Vite) ────────────────────────────────────
+frontend/dist/
+frontend/dist-ssr/
+frontend/coverage/
+frontend/.eslintcache
+frontend/*.timestamp-*-*.mjs
+frontend/*.tsbuildinfo
+
+# Cypress
+frontend/cypress/videos/
+frontend/cypress/screenshots/
+
+# Vitest
+frontend/__screenshots__/
+
+# ── Logs ─────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── OS & Editor ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.local
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.fleet/
+.idea/
+.vscode/*
+!.vscode/extensions.json
