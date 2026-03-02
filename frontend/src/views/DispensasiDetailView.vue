@@ -373,12 +373,7 @@ function printDispensasi() {
 
   <!-- Update Action Buttons -->
   <div v-if="dispensasi && !loading" class="flex gap-2 no-print">
-    no-print <button
-      @click="printDispensasi"
-      class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
-    >
-      🖨️ Print
-    </button>
+   
     
     <router-link
       v-if="canEdit"
@@ -397,20 +392,3 @@ function printDispensasi() {
     </button>
   </div>
 </template>
-
-<!-- Tambahkan style untuk print -->
-<style>
-@media print {
-  nav, .no-print {
-    display: none !important;
-  }
-  
-  body {
-    background: white !important;
-  }
-  
-  .max-w-5xl {
-    max-width: 100% !important;
-  }
-}
-</style>
