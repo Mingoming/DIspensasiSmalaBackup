@@ -6,13 +6,10 @@ import { useAuthStore } from '@/stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const form = ref({
-  email: '',
-  password: ''
-})
-
+const form = ref({ email: '', password: '' })
 const loading = ref(false)
 const error = ref('')
+const showPassword = ref(false)
 
 async function handleLogin() {
   error.value = ''
@@ -41,7 +38,6 @@ async function handleLogin() {
 
       <!-- Logo & Header -->
       <div class="text-center mb-8">
-        <!-- Logo SMALA -->
         <div class="flex justify-center mb-4">
           <img
             :src="`/images/logo-smala.png.PNG`"
@@ -51,13 +47,14 @@ async function handleLogin() {
           />
           <!-- Fallback -->
           <div
-            class="h-20 w-20 bg-primary-500 rounded-2xl items-center justify-center hidden"
+            class="h-20 w-20 bg-primary-100 rounded-2xl items-center justify-center hidden"
             style="display:none"
           >
-            <span class="text-4xl">🎓</span>
+            <svg class="w-10 h-10 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+            </svg>
           </div>
         </div>
-
         <h1 class="text-2xl font-bold text-gray-800 mb-1">Selamat Datang</h1>
         <p class="text-sm text-gray-500">Sistem Dispensasi</p>
         <p class="text-sm font-semibold text-primary-600">SMA Negeri 5 Mataram</p>
@@ -66,7 +63,9 @@ async function handleLogin() {
       <!-- Error Alert -->
       <div v-if="error" class="mb-5 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
         <div class="flex items-start gap-2">
-          <span>⚠️</span>
+          <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
           <p class="text-sm">{{ error }}</p>
         </div>
       </div>
@@ -81,7 +80,9 @@ async function handleLogin() {
           </label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <span class="text-gray-400 text-sm">📧</span>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
             </div>
             <input
               id="email"
@@ -101,16 +102,31 @@ async function handleLogin() {
           </label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <span class="text-gray-400 text-sm">🔒</span>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
             </div>
             <input
               id="password"
               v-model="form.password"
-              type="password"
+              :type="showPassword ? 'text' : 'password'"
               required
-              class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition"
+              class="w-full pl-10 pr-11 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition"
               placeholder="••••••••"
             />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition"
+            >
+              <svg v-if="showPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+              </svg>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -118,16 +134,16 @@ async function handleLogin() {
         <button
           type="submit"
           :disabled="loading"
-          class="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2.5 rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg mt-2"
+          class="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2.5 rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg mt-2 flex items-center justify-center gap-2"
         >
-          <span v-if="loading" class="flex items-center justify-center gap-2">
-            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Memproses...
-          </span>
-          <span v-else>Masuk</span>
+          <svg v-if="loading" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+          </svg>
+          {{ loading ? 'Memproses...' : 'Masuk' }}
         </button>
       </form>
 
@@ -139,42 +155,6 @@ async function handleLogin() {
             Daftar di sini
           </router-link>
         </p>
-      </div>
-
-      <!-- Divider -->
-      <div class="my-5 flex items-center gap-3">
-        <div class="flex-1 border-t border-gray-200"></div>
-        <span class="text-xs text-gray-400 font-medium">Akun Demo</span>
-        <div class="flex-1 border-t border-gray-200"></div>
-      </div>
-
-      <!-- Test Accounts -->
-      <div class="bg-gray-50 rounded-xl p-4">
-        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Akun untuk testing</p>
-        <div class="space-y-2">
-          <div
-            class="bg-white px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition"
-            @click="form.email = 'admin@sma.com'; form.password = 'password'"
-          >
-            <p class="text-xs font-semibold text-gray-700">👨‍💼 Admin</p>
-            <p class="text-xs text-gray-400">admin@sma.com / password</p>
-          </div>
-          <div
-            class="bg-white px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition"
-            @click="form.email = 'budi@sma.com'; form.password = 'password'"
-          >
-            <p class="text-xs font-semibold text-gray-700">👨‍🏫 Guru</p>
-            <p class="text-xs text-gray-400">budi@sma.com / password</p>
-          </div>
-          <div
-            class="bg-white px-3 py-2 rounded-lg border border-gray-200 cursor-pointer hover:border-primary-300 hover:bg-primary-50/30 transition"
-            @click="form.email = 'siswa@sma.com'; form.password = 'password'"
-          >
-            <p class="text-xs font-semibold text-gray-700">👨‍🎓 Siswa</p>
-            <p class="text-xs text-gray-400">siswa@sma.com / password</p>
-          </div>
-        </div>
-        <p class="text-[10px] text-gray-400 mt-2 text-center">Klik akun untuk mengisi form otomatis</p>
       </div>
 
     </div>

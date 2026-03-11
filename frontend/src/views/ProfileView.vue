@@ -157,7 +157,9 @@ onMounted(() => {
       <!-- Header -->
       <div>
         <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <span>👤</span> Pengaturan Profile
+          <!-- User icon -->
+          
+          Pengaturan Profile
         </h1>
         <p class="text-sm text-gray-500 mt-0.5">Kelola informasi dan keamanan akun Anda</p>
       </div>
@@ -189,6 +191,7 @@ onMounted(() => {
                 class="absolute bottom-0 right-0 w-8 h-8 bg-primary-500 hover:bg-primary-600 text-white rounded-full flex items-center justify-center cursor-pointer shadow-md transition"
                 title="Ganti foto profil"
               >
+                <!-- Camera icon -->
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -197,7 +200,6 @@ onMounted(() => {
               <input id="avatar-upload" type="file" accept="image/*" class="hidden" @change="handleAvatarChange" />
             </div>
 
-            <!-- Konfirmasi upload -->
             <div v-if="avatarFile" class="flex gap-1.5">
               <button
                 @click="handleUploadAvatar"
@@ -225,23 +227,58 @@ onMounted(() => {
                 class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-700"
               >{{ role.display_name }}</span>
             </div>
-            <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 justify-center sm:justify-start">
-              <span v-if="user?.role === 'siswa' && user?.kelas">🏫 {{ user?.kelas?.nama_kelas }}</span>
-              <span v-if="user?.role === 'siswa' && user?.nisn">🆔 NISN: {{ user?.nisn }}</span>
-              <span v-if="user?.role !== 'siswa' && user?.nip">🆔 NIP: {{ user?.nip }}</span>
-              <span v-if="user?.mata_pelajaran">📖 {{ user?.mata_pelajaran }}</span>
-              <span v-if="user?.no_telepon">📱 {{ user?.no_telepon }}</span>
+            <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-gray-500 justify-center sm:justify-start">
+              <span v-if="user?.role === 'siswa' && user?.kelas" class="flex items-center gap-1">
+                <!-- Building icon -->
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                {{ user?.kelas?.nama_kelas }}
+              </span>
+              <span v-if="user?.role === 'siswa' && user?.nisn" class="flex items-center gap-1">
+                <!-- ID card icon -->
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0" />
+                </svg>
+                NISN: {{ user?.nisn }}
+              </span>
+              <span v-if="user?.role !== 'siswa' && user?.nip" class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0" />
+                </svg>
+                NIP: {{ user?.nip }}
+              </span>
+              <span v-if="user?.mata_pelajaran" class="flex items-center gap-1">
+                <!-- Book icon -->
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                {{ user?.mata_pelajaran }}
+              </span>
+              <span v-if="user?.no_telepon" class="flex items-center gap-1">
+                <!-- Phone icon -->
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                {{ user?.no_telepon }}
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Alert global -->
-      <div v-if="profileSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex gap-2">
-        <span>✅</span> {{ profileSuccess }}
+      <div v-if="profileSuccess" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        {{ profileSuccess }}
       </div>
-      <div v-if="profileError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex gap-2">
-        <span>❌</span> {{ profileError }}
+      <div v-if="profileError" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        {{ profileError }}
       </div>
 
       <!-- Tabs -->
@@ -254,7 +291,11 @@ onMounted(() => {
               : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
             class="flex-1 px-6 py-3.5 text-sm font-semibold transition flex items-center justify-center gap-2"
           >
-            <span>📝</span> Informasi Profile
+            <!-- Pencil icon -->
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Informasi Profile
           </button>
           <button
             @click="activeTab = 'password'"
@@ -263,7 +304,11 @@ onMounted(() => {
               : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'"
             class="flex-1 px-6 py-3.5 text-sm font-semibold transition flex items-center justify-center gap-2"
           >
-            <span>🔐</span> Ubah Password
+            <!-- Lock icon -->
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            Ubah Password
           </button>
         </div>
 
@@ -320,22 +365,35 @@ onMounted(() => {
 
             <div class="pt-2">
               <button type="submit" :disabled="loadingProfile"
-                class="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2.5 rounded-lg text-sm font-semibold transition">
-                {{ loadingProfile ? 'Menyimpan...' : '💾 Simpan Perubahan' }}
+                class="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2.5 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
+                <svg v-if="loadingProfile" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+                {{ loadingProfile ? 'Menyimpan...' : 'Simpan Perubahan' }}
               </button>
             </div>
           </form>
 
           <!-- Password Tab -->
           <div v-if="activeTab === 'password'">
-            <div v-if="passwordSuccess" class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex gap-2">
-              <span>✅</span> {{ passwordSuccess }}
+            <div v-if="passwordSuccess" class="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {{ passwordSuccess }}
             </div>
-            <div v-if="passwordError" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex gap-2">
-              <span>❌</span> {{ passwordError }}
+            <div v-if="passwordError" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+              <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {{ passwordError }}
             </div>
 
             <form @submit.prevent="handleUpdatePassword" class="space-y-4">
+
               <!-- Current password -->
               <div>
                 <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">Password Saat Ini <span class="text-red-400">*</span></label>
@@ -344,8 +402,14 @@ onMounted(() => {
                     placeholder="Masukkan password saat ini"
                     class="w-full px-4 py-2.5 pr-11 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition" />
                   <button type="button" @click="showCurrentPassword = !showCurrentPassword"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition text-sm">
-                    {{ showCurrentPassword ? '🙈' : '👁️' }}
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                    <svg v-if="showCurrentPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                    <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -358,8 +422,14 @@ onMounted(() => {
                     placeholder="Minimal 8 karakter"
                     class="w-full px-4 py-2.5 pr-11 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition" />
                   <button type="button" @click="showNewPassword = !showNewPassword"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition text-sm">
-                    {{ showNewPassword ? '🙈' : '👁️' }}
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                    <svg v-if="showNewPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                    <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -373,27 +443,53 @@ onMounted(() => {
                     :class="passwordMismatch ? 'border-red-300 focus:ring-red-300' : 'border-gray-200 focus:ring-primary-400'"
                     class="w-full px-4 py-2.5 pr-11 text-sm border rounded-lg focus:ring-2 focus:border-transparent outline-none transition" />
                   <button type="button" @click="showConfirmPassword = !showConfirmPassword"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition text-sm">
-                    {{ showConfirmPassword ? '🙈' : '👁️' }}
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                    <svg v-if="showConfirmPassword" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                    <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                   </button>
                 </div>
-                <p v-if="passwordMismatch" class="text-xs text-red-500 mt-1">Password tidak cocok</p>
+                <p v-if="passwordMismatch" class="text-xs text-red-500 mt-1 flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Password tidak cocok
+                </p>
               </div>
 
               <!-- Tips -->
               <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                <p class="text-xs font-semibold text-blue-700 mb-2">💡 Tips Keamanan</p>
-                <ul class="text-xs text-blue-600 space-y-1 list-disc ml-4">
-                  <li>Gunakan minimal 8 karakter</li>
-                  <li>Kombinasikan huruf besar, kecil, angka, dan simbol</li>
-                  <li>Jangan gunakan password yang mudah ditebak</li>
+                <div class="flex items-center gap-2 mb-2">
+                  <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  <p class="text-xs font-semibold text-blue-700">Tips Keamanan</p>
+                </div>
+                <ul class="text-xs text-blue-600 space-y-1.5">
+                  <li v-for="tip in ['Gunakan minimal 8 karakter', 'Kombinasikan huruf besar, kecil, angka, dan simbol', 'Jangan gunakan password yang mudah ditebak']"
+                    :key="tip" class="flex items-start gap-2">
+                    <svg class="w-3.5 h-3.5 text-blue-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ tip }}
+                  </li>
                 </ul>
               </div>
 
               <div class="pt-2">
                 <button type="submit" :disabled="loadingPassword || passwordMismatch"
-                  class="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2.5 rounded-lg text-sm font-semibold transition">
-                  {{ loadingPassword ? 'Memproses...' : '🔐 Ubah Password' }}
+                  class="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2.5 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
+                  <svg v-if="loadingPassword" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  {{ loadingPassword ? 'Memproses...' : 'Ubah Password' }}
                 </button>
               </div>
             </form>
