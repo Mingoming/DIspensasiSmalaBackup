@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\BackupController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\MataPelajaranController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,9 +41,12 @@ Route::middleware(['throttle:60,1'])->group(function(){
             'data' => \App\Models\Role::all()
         ]);
     });
-    Route::get('/config/mata-pelajaran', function(){
+    Route::get('/config/mata-pelajaran', function () {
         return response()->json([
-            'data' => config('dispensasi.mata_pelajaran')
+            'data' => \App\Models\MataPelajaran::where('aktif', true)
+                ->orderBy('nama')
+                ->pluck('nama')
+                ->values()
         ]);
     });
     Route::get('/config/jam-pelajaran', function(){
@@ -69,11 +73,10 @@ Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
     Route::put('/dispensasi/{id}/status', [DispensasiController::class, 'updateStatus']);
 
     // Get mata pelajaran list
-    Route::get('/config/mata-pelajaran', function() {
-        return response()->json([
-            'data' => config('dispensasi.mata_pelajaran')
-        ]);
-    });
+    Route::get('/config/mata-pelajaran', [MataPelajaranController::class, 'index']);
+
+    //CRUD admin
+    Route::apiResource('/mata-pelajaran', MataPelajaranController::class);
 
     // Get jam pelajaran list
     Route::get('/config/jam-pelajaran', function() {

@@ -52,7 +52,7 @@ class ExportController extends Controller
         $user = $request->user();
 
         // Only kesiswaan can export
-        if (!$user->hasRole('kesiswaan')) {
+        if (!$user->canApproveDispensasi()) {
             return response()->json([
                 'message' => 'Unauthorized. Only kesiswaan can export data.',
             ], 403);
