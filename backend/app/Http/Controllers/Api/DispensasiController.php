@@ -107,8 +107,8 @@ class DispensasiController extends Controller
 
         $request->validate([
             'tanggal' => 'required|date',
-            'jam_mulai' => 'required|date_format:H:i',
-            'jam_selesai' => 'required|date_format:H:i|after:jam_mulai',
+            'jam_pelajaran_mulai' => 'required|integer|min:1|max:8',
+            'jam_pelajaran_selesai' => 'required|integer|min:1|max:8|gte:jam_pelajaran_mulai',
             'mata_pelajaran' => 'required|string',
             'keperluan' => 'required|string',
             'surat_dispensasi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',

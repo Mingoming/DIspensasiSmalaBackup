@@ -80,7 +80,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'required|in:siswa,guru,admin',
+            'role' => 'required|in:siswa,guru,kesiswaan,admin',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,name',
             'nisn' => 'required_if:role,siswa|nullable|string',
@@ -103,10 +103,7 @@ class UserController extends Controller
         ]);
 
         // Attach roles if guru/admin
-        if ($request->role !== 'siswa' && $request->has('roles') && !empty($request->roles)) {
-            $roleIds = Role::whereIn('name', $request->roles)->pluck('id');
-            $user->roles()->attach($roleIds);
-        }
+        $this->syncUserRoles($user, $request);
 
         $user->load(['kelas', 'roles']);
 
@@ -160,7 +157,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8',
-            'role' => 'required|in:siswa,guru,admin',
+            'role' => 'required|in:siswa,guru,kesiswaan,admin',
             'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,name',
             'nisn' => 'required_if:role,siswa|nullable|string',
@@ -189,13 +186,7 @@ class UserController extends Controller
         $user->update($data);
 
         // Update roles
-        if ($request->role !== 'siswa') {
-            $user->roles()->detach();
-            if ($request->has('roles') && !empty($request->roles)) {
-                $roleIds = Role::whereIn('name', $request->roles)->pluck('id');
-                $user->roles()->attach($roleIds);
-            }
-        }
+        $this->syncUserRoles($user, $request);
 
         $user->load(['kelas', 'roles']);
 
@@ -300,5 +291,32 @@ class UserController extends Controller
         ];
 
         return response()->json($stats);
+    }
+
+    private function syncUserRoles(User $user, Request $request): void
+    {
+        $roleNames = [];
+
+        if ($request->role === 'admin') {
+            $roleNames[] = 'admin';
+        }
+
+        if ($request->role === 'kesiswaan') {
+            $roleNames[] = 'kesiswaan';
+        }
+
+        if ($request->role === 'guru') {
+            $roleNames[] = 'guru_mapel';
+        }
+
+        if ($request->filled('roles')) {
+            $roleNames = array_merge($roleNames, $request->roles);
+        }
+
+        $roleNames = array_unique($roleNames);
+
+        $roleIds = Role::whereIn('name', $roleNames)->pluck('id')->toArray();
+
+        $user->roles()->sync($roleIds);
     }
 }

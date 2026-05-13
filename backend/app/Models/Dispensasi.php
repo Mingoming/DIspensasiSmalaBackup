@@ -34,19 +34,19 @@ class Dispensasi extends Model
     // Date format accessors for dd/mm/yy format
     protected function serializeDate(\DateTimeInterface $date): string
     {
-        return $date->format('d/m/y');
+        return $date->format('Y-m-d');
     }
 
     // Accessor for formatted tanggal
     public function getTanggalFormattedAttribute(): string
     {
-        return $this->tanggal ? $this->tanggal->format('d/m/y') : '';
+        return $this->tanggal ? $this->tanggal->format('Y-m-d') : '';
     }
 
     // Accessor for full date format (dd/mm/yyyy)
     public function getTanggalFullAttribute(): string
     {
-        return $this->tanggal ? $this->tanggal->format('d/m/Y') : '';
+        return $this->tanggal ? $this->tanggal->format('Y-m-d') : '';
     }
 
     public function getJamMulaiAttribute()
