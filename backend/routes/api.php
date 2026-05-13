@@ -123,4 +123,6 @@ Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
     Route::post('/backups', [BackupController::class, 'create']);
     Route::get('/backups/{filename}/download', [BackupController::class, 'download']);
     Route::delete('/backups/{filename}', [BackupController::class, 'destroy']);
+
+    Route::apiResource('/kelas', KelasController::class)->except(['index', 'show']);
 });
