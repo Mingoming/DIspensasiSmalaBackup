@@ -81,8 +81,6 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'required|in:siswa,guru,kesiswaan,admin',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,name',
             'nisn' => 'required_if:role,siswa|nullable|string',
             'nip' => 'required_if:role,guru,admin|nullable|string',
             'mata_pelajaran' => 'nullable|string',
@@ -158,8 +156,6 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8',
             'role' => 'required|in:siswa,guru,kesiswaan,admin',
-            'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,name',
             'nisn' => 'required_if:role,siswa|nullable|string',
             'nip' => 'required_if:role,guru,admin|nullable|string',
             'mata_pelajaran' => 'nullable|string',
@@ -213,6 +209,7 @@ class UserController extends Controller
         AuditLog::log(
             'update',
             "User '{$user->name}' diperbarui oleh {$authUser->name}. Perubahan: {$changesDescription}",
+            'User',
             $user->id,
             $oldValues,
             $newValues
@@ -286,6 +283,7 @@ class UserController extends Controller
             'total_users' => User::count(),
             'total_siswa' => User::where('role', 'siswa')->count(),
             'total_guru' => User::where('role', 'guru')->count(),
+            'total_kesiswaan' => User::where('role', 'kesiswaan')->count(),
             'total_admin' => User::where('role', 'admin')->count(),
             'users_this_month' => User::whereMonth('created_at', now()->month)->count(),
         ];
@@ -295,25 +293,12 @@ class UserController extends Controller
 
     private function syncUserRoles(User $user, Request $request): void
     {
-        $roleNames = [];
-
-        if ($request->role === 'admin') {
-            $roleNames[] = 'admin';
-        }
-
-        if ($request->role === 'kesiswaan') {
-            $roleNames[] = 'kesiswaan';
-        }
-
-        if ($request->role === 'guru') {
-            $roleNames[] = 'guru_mapel';
-        }
-
-        if ($request->filled('roles')) {
-            $roleNames = array_merge($roleNames, $request->roles);
-        }
-
-        $roleNames = array_unique($roleNames);
+        $roleNames = match ($request->role) {
+            'admin' => ['admin'],
+            'kesiswaan' => ['kesiswaan'],
+            'guru' => ['guru_mapel'],
+            default => [],
+        };
 
         $roleIds = Role::whereIn('name', $roleNames)->pluck('id')->toArray();
 

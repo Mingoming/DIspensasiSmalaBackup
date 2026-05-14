@@ -79,3 +79,31 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Archives / manual backups
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+
+# Database dumps / exports
+*.sql
+*.dump
+*.bak
+*.backup
+
+# Root temporary logs from migration/copy/debug
+/copylog.txt
+/fail.txt
+
+# Laravel backup outputs, eksplisit walau sebagian sudah tercakup
+backend/storage/app/backups/
+backend/storage/app/backup-temp/
+
+# More secret/certificate formats
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
