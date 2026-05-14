@@ -16,12 +16,11 @@ class DispensasiController extends Controller
         $user = $request->user();
 
         // Admin & Kesiswaan: lihat semua
-        if ($user->canApproveDispensasi()) {
+        if ($user->canViewAllDispensasi()) {
             $dispensasi = Dispensasi::with(['siswa', 'kelas', 'approver'])
                 ->latest()
                 ->get();
         } else {
-            // Siswa & Guru Mapel: lihat punya sendiri saja
             $dispensasi = Dispensasi::with(['siswa', 'kelas', 'approver'])
                 ->where('user_id', $user->id)
                 ->latest()
@@ -69,6 +68,12 @@ class DispensasiController extends Controller
             $dispensasi->toArray()
         );
 
+        if (!$request->user()->isSiswa()) {
+            return response()->json([
+                'message' => 'Unauthorized. Hanya siswa yang bisa membuat dispensasi.',
+            ], 403);
+        }
+
         return response()->json([
             'message' => 'Dispensasi berhasil diajukan',
             'data' => $dispensasi->load(['siswa', 'kelas']),
@@ -76,14 +81,23 @@ class DispensasiController extends Controller
     }
 
     // Show Single Dispensasi
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $user = $request->user();
+
         $dispensasi = Dispensasi::with(['siswa', 'kelas', 'approver'])->findOrFail($id);
+
+        if (!$user->canViewAllDispensasi() && $dispensasi->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 403);
+        }
 
         return response()->json([
             'data' => $dispensasi,
         ]);
     }
+
 
     // Update Dispensasi (Siswa - hanya jika status pending)
     public function update(Request $request, $id)

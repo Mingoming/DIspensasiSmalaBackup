@@ -14,7 +14,7 @@ class AnalyticsController extends Controller
     // Get overview statistics
     public function overview(Request $request)
     {
-        $user = $request->user();
+        $this->authorizeAnalytics($request);
 
         $stats = [
             'total_dispensasi' => Dispensasi::count(),
@@ -34,6 +34,7 @@ class AnalyticsController extends Controller
     // Get dispensasi by month (untuk chart)
     public function dispensasiByMonth(Request $request)
     {
+        $this->authorizeAnalytics($request);
         $year = $request->get('year', now()->year);
 
         $data = Dispensasi::select(
@@ -71,6 +72,8 @@ class AnalyticsController extends Controller
     // Get dispensasi by kelas
     public function dispensasiByKelas(Request $request)
     {
+        $this->authorizeAnalytics($request);
+
         $data = Dispensasi::select(
             'kelas_id',
             DB::raw('COUNT(*) as total'),
@@ -99,6 +102,7 @@ class AnalyticsController extends Controller
     // Get top 10 siswa dengan dispensasi terbanyak
     public function topSiswa(Request $request)
     {
+        $this->authorizeAnalytics($request);
         $limit = $request->get('limit', 10);
 
         $data = Dispensasi::select('user_id', DB::raw('COUNT(*) as total'))
@@ -124,6 +128,7 @@ class AnalyticsController extends Controller
     // Get dispensasi by mata pelajaran
     public function dispensasiByMapel(Request $request)
     {
+        $this->authorizeAnalytics($request);
         $limit = $request->get('limit', 10);
 
         $data = Dispensasi::select('mata_pelajaran', DB::raw('COUNT(*) as total'))
@@ -140,6 +145,7 @@ class AnalyticsController extends Controller
     // Get approval rate (persentase approve vs reject)
     public function approvalRate(Request $request)
     {
+        $this->authorizeAnalytics($request);
         $total = Dispensasi::whereIn('status', ['approved', 'rejected'])->count();
         $approved = Dispensasi::where('status', 'approved')->count();
         $rejected = Dispensasi::where('status', 'rejected')->count();
@@ -155,4 +161,16 @@ class AnalyticsController extends Controller
             'rejection_rate' => $rejectionRate,
         ]);
     }
+
+    private function authorizeAnalytics(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->isAdmin() && !$user->isKesiswaan()) {
+            abort(response()->json([
+                'message' => 'Unauthorized. Hanya admin dan kesiswaan yang bisa melihat analytics.',
+            ], 403));
+        }
+    }
+
 }
