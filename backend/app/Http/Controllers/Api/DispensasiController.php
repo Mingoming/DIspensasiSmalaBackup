@@ -35,7 +35,13 @@ class DispensasiController extends Controller
     // Create Dispensasi (Siswa)
     public function store(Request $request)
     {
-        $request->validate([
+        if (!$request->user()->isSiswa()) {
+            return response()->json([
+                'message' => 'Unauthorized. Hanya siswa yang bisa membuat dispensasi.',
+            ], 403);
+        }
+
+        $data = $request->validate([
             'tanggal' => 'required|date',
             'jam_pelajaran_mulai' => 'required|integer|min:1|max:8',
             'jam_pelajaran_selesai' => 'required|integer|min:1|max:8|gte:jam_pelajaran_mulai',
@@ -44,7 +50,6 @@ class DispensasiController extends Controller
             'surat_dispensasi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
-        $data = $request->all();
         $data['user_id'] = $request->user()->id;
         $data['kelas_id'] = $request->user()->kelas_id;
         $data['status'] = 'pending';
@@ -67,12 +72,6 @@ class DispensasiController extends Controller
             null,
             $dispensasi->toArray()
         );
-
-        if (!$request->user()->isSiswa()) {
-            return response()->json([
-                'message' => 'Unauthorized. Hanya siswa yang bisa membuat dispensasi.',
-            ], 403);
-        }
 
         return response()->json([
             'message' => 'Dispensasi berhasil diajukan',
@@ -119,7 +118,7 @@ class DispensasiController extends Controller
             ], 400);
         }
 
-        $request->validate([
+        $data = $request->validate([
             'tanggal' => 'required|date',
             'jam_pelajaran_mulai' => 'required|integer|min:1|max:8',
             'jam_pelajaran_selesai' => 'required|integer|min:1|max:8|gte:jam_pelajaran_mulai',
@@ -127,8 +126,6 @@ class DispensasiController extends Controller
             'keperluan' => 'required|string',
             'surat_dispensasi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
-
-        $data = $request->all();
 
         // Upload file baru jika ada
         if ($request->hasFile('surat_dispensasi')) {

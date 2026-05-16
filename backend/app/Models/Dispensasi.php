@@ -31,48 +31,37 @@ class Dispensasi extends Model
         'jam_pelajaran_selesai' => 'integer',
     ];
 
-    // Date format accessors for dd/mm/yy format
+    protected $appends = [
+        'jam_mulai',
+        'jam_selesai',
+    ];
+
     protected function serializeDate(\DateTimeInterface $date): string
     {
         return $date->format('Y-m-d');
     }
 
-    // Accessor for formatted tanggal
-    public function getTanggalFormattedAttribute(): string
-    {
-        return $this->tanggal ? $this->tanggal->format('Y-m-d') : '';
-    }
-
-    // Accessor for full date format (dd/mm/yyyy)
-    public function getTanggalFullAttribute(): string
-    {
-        return $this->tanggal ? $this->tanggal->format('Y-m-d') : '';
-    }
-
     public function getJamMulaiAttribute()
     {
-        return $this->convertJamPelajaranToTime($this->jam_pelajaran_mulai);
+        return $this->getJamPelajaranBoundary($this->jam_pelajaran_mulai, 0);
     }
 
     public function getJamSelesaiAttribute()
     {
-        return $this->convertJamPelajaranToTime($this->jam_pelajaran_selesai);
+        return $this->getJamPelajaranBoundary($this->jam_pelajaran_selesai, 1);
     }
 
-    private function convertJamPelajaranToTime($jamPelajaran)
+    private function getJamPelajaranBoundary($jamPelajaran, int $index)
     {
-        $jamMap = [
-            1 => '07:00',
-            2 => '07:45',
-            3 => '08:30',
-            4 => '09:15',
-            5 => '10:15',
-            6 => '11:00',
-            7 => '11:45',
-            8 => '12:30',
-        ];
+        $range = config("dispensasi.jam_pelajaran.{$jamPelajaran}");
 
-        return $jamMap[$jamPelajaran] ?? '-';
+        if (!$range) {
+            return '-';
+        }
+
+        $parts = array_map('trim', explode('-', $range, 2));
+
+        return $parts[$index] ?? '-';
     }
 
     // Relasi ke User (siswa yang mengajukan)

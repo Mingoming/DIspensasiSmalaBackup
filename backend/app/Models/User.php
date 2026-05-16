@@ -108,6 +108,11 @@ class User extends Authenticatable
         return $this->hasAnyRole(['admin', 'kesiswaan']);
     }
 
+    public function canViewAllDispensasi()
+    {
+        return $this->canApproveDispensasi();
+    }
+
     // Relasi lainnya (existing)
     public function kelas()
     {

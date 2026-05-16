@@ -72,9 +72,6 @@ Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
     // Approve/Reject (Guru only)
     Route::put('/dispensasi/{id}/status', [DispensasiController::class, 'updateStatus']);
 
-    // Get mata pelajaran list
-    Route::get('/config/mata-pelajaran', [MataPelajaranController::class, 'index']);
-
     //CRUD admin
     Route::apiResource('/mata-pelajaran', MataPelajaranController::class);
 
