@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,52 +11,6 @@ use App\Models\AuditLog;
 
 class AuthController extends Controller
 {
-    // Register
-    public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:siswa,guru',
-            'roles' => 'nullable|array',
-            'roles.*' => 'in:guru_mapel',
-            'nisn' => 'required_if:role,siswa|nullable|string',
-            'nip' => 'required_if:role,guru|nullable|string',
-            'mata_pelajaran' => 'nullable|string',
-            'kelas_id' => 'required_if:role,siswa|nullable|exists:kelas,id',
-            'no_telepon' => 'nullable|string',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'nisn' => $request->nisn,
-            'nip' => $request->nip,
-            'mata_pelajaran' => $request->mata_pelajaran,
-            'kelas_id' => $request->kelas_id,
-            'no_telepon' => $request->no_telepon,
-        ]);
-
-        if ($request->role === 'guru') {
-            $roleIds = Role::where('name', 'guru_mapel')->pluck('id');
-            $user->roles()->sync($roleIds);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        // IMPORTANT: Load relasi sebelum return
-        $user->load(['kelas', 'roles']);
-
-        return response()->json([
-            'message' => 'Registrasi berhasil',
-            'user' => $user,
-            'token' => $token,
-        ], 201);
-    }
-
     // Login
     public function login(Request $request)
     {

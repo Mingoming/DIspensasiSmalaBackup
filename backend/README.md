@@ -240,7 +240,6 @@ Base URL: `http://localhost:8000/api`
 |---|---|---|
 | `GET` | `/test` | Cek apakah API berjalan |
 | `POST` | `/login` | Login pengguna |
-| `POST` | `/register` | Daftar akun baru |
 | `GET` | `/kelas` | Daftar semua kelas |
 
 ### Memerlukan Login (butuh token)
