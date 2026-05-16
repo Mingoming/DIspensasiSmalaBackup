@@ -1,6 +1,6 @@
 # Sistem Dispensasi SMALA
 
-Aplikasi manajemen dispensasi (izin meninggalkan pelajaran) berbasis web untuk lingkungan SMA. Dibangun dengan **Laravel 10** (backend API) dan **Vue 3 + Vite** (frontend), dilengkapi fitur manajemen pengguna, multi-role, ekspor Excel/PDF, analitik, audit log, dan backup otomatis.
+Aplikasi manajemen dispensasi (izin meninggalkan pelajaran) berbasis web untuk lingkungan SMA. Dibangun dengan **Laravel 10** (backend API) dan **Vue 3 + Vite** (frontend), dilengkapi fitur manajemen pengguna oleh admin, multi-role, ekspor Excel/CSV, analitik, audit log, dan backup otomatis.
 
 ---
 
@@ -37,9 +37,10 @@ Aplikasi manajemen dispensasi (izin meninggalkan pelajaran) berbasis web untuk l
 11. [Halaman dan Fitur Aplikasi](#11-halaman-dan-fitur-aplikasi)
 12. [Struktur Folder Proyek](#12-struktur-folder-proyek)
 13. [Referensi API Backend](#13-referensi-api-backend)
-14. [Menghentikan dan Menjalankan Ulang](#14-menghentikan-dan-menjalankan-ulang)
-15. [Troubleshooting (Masalah Umum)](#15-troubleshooting-masalah-umum)
-16. [Ekstensi VS Code yang Disarankan](#16-ekstensi-vs-code-yang-disarankan)
+14. [Pengujian](#14-pengujian)
+15. [Menghentikan dan Menjalankan Ulang](#15-menghentikan-dan-menjalankan-ulang)
+16. [Troubleshooting (Masalah Umum)](#16-troubleshooting-masalah-umum)
+17. [Ekstensi VS Code yang Disarankan](#17-ekstensi-vs-code-yang-disarankan)
 
 ---
 
@@ -52,13 +53,13 @@ Sistem ini terdiri dari dua bagian yang bekerja bersama:
 │                     Browser Pengguna                    │
 │                  http://localhost:5173                  │
 │                                                         │
-│             Frontend — Vue 3 + Vite                     │
+│             Frontend - Vue 3 + Vite                     │
 │         (tampilan web, form, grafik, dll.)              │
 └───────────────────────┬─────────────────────────────────┘
                         │ HTTP Request (JSON)
                         ▼
 ┌─────────────────────────────────────────────────────────┐
-│           Backend API — Laravel 10                      │
+│           Backend API - Laravel 10                      │
 │                http://localhost:8000                    │
 │                                                         │
 │   (autentikasi, logika bisnis, database, ekspor)        │
@@ -71,8 +72,8 @@ Sistem ini terdiri dari dua bagian yang bekerja bersama:
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Backend** mengelola semua data dan logika bisnis — ia adalah API murni yang tidak menampilkan halaman.
-**Frontend** adalah tampilan yang diakses pengguna di browser — ia mengambil dan mengirim data ke backend.
+**Backend** mengelola semua data dan logika bisnis - ia adalah API murni yang tidak menampilkan halaman.
+**Frontend** adalah tampilan yang diakses pengguna di browser - ia mengambil dan mengirim data ke backend.
 
 ---
 
@@ -81,11 +82,10 @@ Sistem ini terdiri dari dua bagian yang bekerja bersama:
 | Komponen | Teknologi | Versi |
 |---|---|---|
 | Backend Framework | Laravel | 10.x |
-| Bahasa Backend | PHP | 8.1 – 8.2 |
+| Bahasa Backend | PHP | 8.1 sampai 8.2 |
 | Database | MySQL / MariaDB | via XAMPP |
 | Autentikasi API | Laravel Sanctum | 3.x |
-| Ekspor Excel | Maatwebsite Excel | 3.1 |
-| Ekspor PDF | barryvdh/laravel-dompdf | 3.x |
+| Ekspor Excel/CSV | Maatwebsite Excel | 3.1 |
 | Backup Otomatis | spatie/laravel-backup | 8.x |
 | Frontend Framework | Vue | 3.x |
 | Build Tool Frontend | Vite | 7.x |
@@ -103,12 +103,12 @@ Berikut adalah semua yang dibutuhkan sebelum memulai. Bagian selanjutnya menjela
 
 | Perangkat Lunak | Versi Minimal | Catatan |
 |---|---|---|
-| **VS Code** | Terbaru | Sudah ada — diasumsikan terinstal |
+| **VS Code** | Terbaru | Sudah ada - diasumsikan terinstal |
 | **XAMPP** | 3.3 | Menyertakan PHP 8.2 dan MySQL |
 | **Composer** | 2.x | Manajer paket PHP |
 | **Node.js** | 20.19.0 atau 22.12.0+ | Untuk menjalankan frontend |
 
-> **Catatan Penting:** XAMPP sudah menyertakan PHP 8.2 — kamu **tidak perlu** menginstal PHP secara terpisah. Namun Node.js dan Composer tetap harus diinstal sendiri.
+> **Catatan Penting:** XAMPP sudah menyertakan PHP 8.2 - kamu **tidak perlu** menginstal PHP secara terpisah. Namun Node.js dan Composer tetap harus diinstal sendiri.
 
 ---
 
@@ -127,12 +127,12 @@ XAMPP menyediakan PHP dan MySQL yang dibutuhkan oleh backend Laravel.
 **Unduh dan Install:**
 
 1. Buka browser, pergi ke: **https://www.apachefriends.org/download.html**
-2. Klik **"XAMPP for Windows"** — pilih versi **8.2.x** (sudah include PHP 8.2)
+2. Klik **"XAMPP for Windows"** - pilih versi **8.2.x** (sudah include PHP 8.2)
 3. Unduh file installer `.exe`
 4. Jalankan installer, klik **Next** terus hingga selesai
-   - Lokasi instalasi default: `C:\xampp` — **disarankan dibiarkan default**
+   - Lokasi instalasi default: `C:\xampp` - **disarankan dibiarkan default**
    - Centang minimal: **Apache**, **MySQL**, **PHP**, **phpMyAdmin**
-5. Klik **Finish** — XAMPP Control Panel akan terbuka
+5. Klik **Finish** - XAMPP Control Panel akan terbuka
 
 **Cek XAMPP terinstal:**
 - Buka File Explorer, pastikan folder `C:\xampp\` ada
@@ -142,7 +142,7 @@ XAMPP menyediakan PHP dan MySQL yang dibutuhkan oleh backend Laravel.
 
 ### 4.3 Composer
 
-Composer adalah manajer paket untuk PHP — digunakan untuk mengunduh semua library Laravel.
+Composer adalah manajer paket untuk PHP - digunakan untuk mengunduh semua library Laravel.
 
 **Unduh dan Install:**
 
@@ -174,10 +174,10 @@ Node.js dibutuhkan untuk menjalankan frontend Vue/Vite. XAMPP tidak menyertakann
 **Unduh dan Install:**
 
 1. Buka browser, pergi ke: **https://nodejs.org**
-2. Klik tombol **"LTS"** — pilih versi **20.x** atau **22.x**
+2. Klik tombol **"LTS"** - pilih versi **20.x** atau **22.x**
 3. Unduh file installer `.msi` untuk Windows
 4. Jalankan installer, klik **Next** terus
-   - Pastikan centang **"Add to PATH"** jika ditanya — ini **wajib**
+   - Pastikan centang **"Add to PATH"** jika ditanya - ini **wajib**
 5. Klik **Install**, tunggu selesai, klik **Finish**
 
 **Cek Node.js terinstal:**
@@ -276,7 +276,7 @@ Sebelum melakukan apapun dengan database, XAMPP harus berjalan.
 Beberapa ekstensi PHP mungkin belum aktif secara default di XAMPP. Lakukan langkah ini **sebelum** menjalankan `composer install`.
 
 1. Di **XAMPP Control Panel**, klik tombol **Config** di baris Apache
-2. Pilih **PHP (php.ini)** — file ini akan terbuka di Notepad
+2. Pilih **PHP (php.ini)** - file ini akan terbuka di Notepad
 3. Tekan **Ctrl + H** untuk membuka Replace, lalu aktifkan ekstensi berikut dengan menghapus titik koma (`;`) di awalnya:
 
    Cari dan ganti:
@@ -317,7 +317,7 @@ Langkah ini mengunduh semua library yang dibutuhkan backend. **Diperlukan koneks
    ```
    composer install
    ```
-4. Tunggu hingga selesai. Proses bisa memakan **3–10 menit** tergantung kecepatan internet.
+4. Tunggu hingga selesai. Proses bisa memakan **3 sampai 10 menit** tergantung kecepatan internet.
 5. Jika berhasil, akan muncul tulisan:
    ```
    Generating optimized autoload files
@@ -454,7 +454,7 @@ Langkah ini mengunduh semua paket JavaScript. **Diperlukan koneksi internet (han
    ```
    npm install
    ```
-3. Tunggu hingga selesai. Proses bisa memakan **2–5 menit**.
+3. Tunggu hingga selesai. Proses bisa memakan **2 sampai 5 menit**.
 4. Jika berhasil, folder `node_modules` akan terbuat di dalam `frontend\`
 
 ---
@@ -499,7 +499,7 @@ Setelah kedua server berjalan:
 
 | Alamat | Keterangan |
 |---|---|
-| **http://localhost:5173** | Aplikasi web (frontend) — buka ini di browser |
+| **http://localhost:5173** | Aplikasi web (frontend) - buka ini di browser |
 | http://localhost:8000/api | Backend API |
 | http://localhost/phpmyadmin | Manajemen database |
 
@@ -531,12 +531,13 @@ Setelah menjalankan seeder (langkah 6.7), akun-akun berikut tersedia:
 
 | Role | Hak Akses |
 |---|---|
-| **Admin** | Akses penuh — manajemen pengguna, audit log, backup, semua fitur |
+| **Admin** | Akses penuh, termasuk manajemen pengguna, master data, audit log, backup, analitik, dan export |
 | **Kesiswaan** | Mengelola dan memproses pengajuan dispensasi seluruh siswa |
-| **Guru Mapel** | Menyetujui atau menolak dispensasi untuk mata pelajarannya |
+| **Guru Mapel** | Melihat jadwal mengajar dan dispensasi siswa yang relevan dengan jam mengajarnya |
 | **Siswa** | Mengajukan permohonan dispensasi, melihat status pengajuan sendiri |
 
 Satu pengguna bisa memiliki lebih dari satu role (contoh: Budi Santoso memiliki role Guru Mapel dan Admin sekaligus).
+Pendaftaran akun publik sudah dinonaktifkan. Akun baru hanya dapat dibuat oleh Admin melalui menu Manajemen Pengguna.
 
 ---
 
@@ -545,14 +546,14 @@ Satu pengguna bisa memiliki lebih dari satu role (contoh: Budi Santoso memiliki 
 | Halaman | URL | Role yang Bisa Akses |
 |---|---|---|
 | Login | `/login` | Semua |
-| Register | `/register` | Semua (belum login) |
 | Dashboard | `/dashboard` | Semua |
 | Daftar Dispensasi | `/dispensasi` | Semua (data disesuaikan role) |
 | Ajukan Dispensasi | `/dispensasi/create` | Siswa |
 | Detail Dispensasi | `/dispensasi/:id` | Semua |
-| Edit Dispensasi | `/dispensasi/:id/edit` | Siswa (milik sendiri), Admin |
+| Edit Dispensasi | `/dispensasi/:id/edit` | Siswa, hanya milik sendiri dan masih pending |
 | Manajemen Pengguna | `/users` | Admin |
 | Tambah Pengguna | `/users/create` | Admin |
+| Master Data | `/admin/master-data` | Admin |
 | Analitik & Statistik | `/analytics` | Admin, Kesiswaan |
 | Profil Akun | `/profile` | Semua |
 | Audit Log | `/audit-logs` | Admin |
@@ -560,11 +561,12 @@ Satu pengguna bisa memiliki lebih dari satu role (contoh: Budi Santoso memiliki 
 
 **Fitur Utama:**
 - Pengajuan dispensasi dengan upload dokumen pendukung
-- Alur persetujuan: Guru Mapel → Kesiswaan
-- Ekspor data ke **Excel** dan **PDF**
+- Alur persetujuan dilakukan oleh Kesiswaan
+- Guru Mapel hanya melihat jadwal dan dispensasi yang relevan dengan jam mengajarnya
+- Ekspor data ke **Excel** dan **CSV**
 - Grafik dan statistik dispensasi (Chart.js)
 - Rate limiting untuk proteksi dari spam dan brute force
-- Audit log — mencatat semua aktivitas penting (siapa, apa, kapan, dari mana)
+- Audit log mencatat aktivitas penting seperti login, pengajuan, approval, export, dan perubahan data
 - Backup otomatis database tiap 6 bulan + weekly safety net
 
 ---
@@ -591,7 +593,7 @@ SistemDispensasi/
 │   │   ├── migrations/        ← Definisi struktur tabel
 │   │   └── seeders/           ← Data awal (akun default, dll.)
 │   ├── public/                ← Entry point web server
-│   ├── resources/views/       ← Template Blade (untuk PDF)
+│   ├── resources/views/       ← Template Blade
 │   ├── routes/
 │   │   ├── api.php            ← Definisi semua endpoint API
 │   │   └── web.php
@@ -631,7 +633,6 @@ Base URL: `http://localhost:8000/api`
 |---|---|---|
 | `GET` | `/test` | Cek apakah API berjalan |
 | `POST` | `/login` | Login, mendapatkan token |
-| `POST` | `/register` | Daftar akun baru |
 | `GET` | `/kelas` | Daftar semua kelas |
 
 ### Endpoint yang Memerlukan Login
@@ -656,28 +657,107 @@ Authorization: Bearer {token}
 | `POST` | `/users` | Tambah pengguna *(Admin)* |
 | `PUT` | `/users/{id}` | Edit pengguna *(Admin)* |
 | `DELETE` | `/users/{id}` | Hapus pengguna *(Admin)* |
+| `GET` | `/jadwal-mengajar` | Daftar jadwal mengajar |
+| `GET` | `/jadwal-terdampak` | Hitung jadwal/mapel terdampak dispensasi |
+| `POST` | `/jadwal-mengajar` | Tambah jadwal mengajar *(Admin)* |
+| `PUT` | `/jadwal-mengajar/{id}` | Edit jadwal mengajar *(Admin)* |
+| `DELETE` | `/jadwal-mengajar/{id}` | Hapus jadwal mengajar *(Admin)* |
+| `POST` | `/kelas` | Tambah kelas *(Admin)* |
+| `PUT` | `/kelas/{id}` | Edit kelas *(Admin)* |
+| `DELETE` | `/kelas/{id}` | Hapus kelas *(Admin)* |
+| `GET` | `/mata-pelajaran` | Daftar mata pelajaran |
+| `POST` | `/mata-pelajaran` | Tambah mata pelajaran *(Admin)* |
+| `PUT` | `/mata-pelajaran/{id}` | Edit mata pelajaran *(Admin)* |
+| `DELETE` | `/mata-pelajaran/{id}` | Hapus mata pelajaran *(Admin)* |
 | `GET` | `/export/excel` | Ekspor data ke Excel |
-| `GET` | `/export/pdf` | Ekspor data ke PDF |
 | `GET` | `/export/csv` | Ekspor data ke CSV |
-| `GET` | `/analytics/summary` | Ringkasan statistik |
-| `GET` | `/analytics/monthly` | Data bulanan |
+| `GET` | `/analytics/overview` | Ringkasan statistik |
+| `GET` | `/analytics/dispensasi-by-month` | Statistik bulanan |
+| `GET` | `/analytics/dispensasi-by-kelas` | Statistik per kelas |
+| `GET` | `/analytics/top-siswa` | Daftar siswa dengan dispensasi terbanyak |
+| `GET` | `/analytics/dispensasi-by-mapel` | Statistik per mata pelajaran |
+| `GET` | `/analytics/approval-rate` | Statistik persetujuan |
 | `GET` | `/audit-logs` | Log aktivitas *(Admin)* |
 | `GET` | `/backups` | Daftar backup *(Admin)* |
 | `POST` | `/backups` | Buat backup manual *(Admin)* |
+| `GET` | `/backups/{filename}/download` | Unduh backup *(Admin)* |
 | `DELETE` | `/backups/{filename}` | Hapus backup *(Admin)* |
 
 ### Rate Limiting
 
 | Endpoint | Batas |
 |---|---|
-| Login / Register | 5 request / menit |
+| Login | 10 request / menit |
 | API umum | 100 request / menit |
 | Export / Download | 10 request / menit |
 | Hapus Pengguna | 20 request / menit |
 
 ---
 
-## 14. Menghentikan dan Menjalankan Ulang
+## 14. Pengujian
+
+Backend menggunakan **Laravel Feature Test** berbasis PHPUnit. Fokus pengujian adalah blackbox testing melalui HTTP endpoint, sesuai user story aplikasi.
+
+### Struktur Test Backend
+
+```
+backend/tests/Feature/
+|-- Admin/
+|   `-- UjiAdminTest.php
+|-- Autentikasi/
+|   `-- UjiAutentikasiTest.php
+|-- Guru/
+|   `-- UjiGuruMapelTest.php
+|-- Kesiswaan/
+|   `-- UjiKesiswaanTest.php
+|-- NonFungsional/
+|   `-- UjiNonFungsionalTest.php
+`-- Siswa/
+    `-- UjiSiswaTest.php
+```
+
+### Cakupan Utama
+
+| File | Cakupan |
+|---|---|
+| `Autentikasi/UjiAutentikasiTest.php` | Login, logout, endpoint wajib login, register publik tidak tersedia |
+| `Siswa/UjiSiswaTest.php` | Pengajuan dispensasi, upload bukti, jadwal terdampak, status dan detail |
+| `Guru/UjiGuruMapelTest.php` | Login guru, jadwal mengajar, akses dispensasi relevan, larangan approve/reject |
+| `Kesiswaan/UjiKesiswaanTest.php` | Melihat pengajuan, detail, approve, reject, analytics mapel |
+| `Admin/UjiAdminTest.php` | User management, role ganda, kelas, mapel, jadwal, rekap, export |
+| `NonFungsional/UjiNonFungsionalTest.php` | Pembuatan user hanya oleh admin, larangan akses endpoint privileged |
+
+### Menjalankan Test
+
+Masuk ke folder backend:
+
+```
+cd backend
+php artisan test
+```
+
+Hasil verifikasi terakhir:
+
+```
+Tests: 27 passed, 159 assertions
+```
+
+Catatan: PHPUnit dapat menampilkan warning schema deprecated pada `phpunit.xml`. Warning ini bukan kegagalan test.
+
+### Build Frontend
+
+Untuk memastikan frontend dapat dibundle:
+
+```
+cd frontend
+npm run build
+```
+
+Build terakhir berhasil dengan 105 modules transformed. Jumlah modul turun karena halaman register publik sudah dihapus.
+
+---
+
+## 15. Menghentikan dan Menjalankan Ulang
 
 ### Menghentikan Server
 
@@ -704,7 +784,7 @@ Kamu tidak perlu mengulang proses setup dari awal. Cukup lakukan ini setiap kali
 
 ---
 
-## 15. Troubleshooting (Masalah Umum)
+## 16. Troubleshooting (Masalah Umum)
 
 ### ❌ `composer` tidak dikenali di Terminal
 
@@ -776,7 +856,7 @@ taskkill /PID <nomor_PID> /F
 **Penyebab:** Backend tidak berjalan atau frontend tidak terhubung ke backend.
 **Solusi:**
 1. Pastikan `php artisan serve` masih berjalan di Terminal
-2. Buka browser, akses `http://127.0.0.1:8000/api/test` — harus muncul JSON
+2. Buka browser, akses `http://127.0.0.1:8000/api/test` - harus muncul JSON
 3. Pastikan tidak ada pesan error di Terminal backend
 
 ---
@@ -801,31 +881,31 @@ php artisan migrate:fresh --seed
 
 ---
 
-### ❌ Error `CORS` — blocked by browser
+### ❌ Error `CORS` - blocked by browser
 
 **Penyebab:** Konfigurasi CORS backend tidak mengizinkan permintaan dari frontend.
 **Solusi:** Pastikan `APP_URL` di `backend\.env` sudah benar (`http://localhost:8000`), dan file `config/cors.php` memiliki `allowed_origins` yang mencakup `http://localhost:5173`.
 
 ---
 
-## 16. Ekstensi VS Code yang Disarankan
+## 17. Ekstensi VS Code yang Disarankan
 
 Instal ekstensi berikut di VS Code untuk pengalaman pengembangan yang lebih baik:
 
 **Untuk Backend (PHP / Laravel):**
-- **PHP Intelephense** (`bmewburn.vscode-intelephense-client`) — autocomplete dan analisis PHP
-- **Laravel Artisan** (`ryannaddy.laravel-artisan`) — jalankan perintah artisan dari VS Code
-- **Laravel Blade Snippets** (`onecentlin.laravel-blade`) — syntax highlight untuk Blade template
+- **PHP Intelephense** (`bmewburn.vscode-intelephense-client`) - autocomplete dan analisis PHP
+- **Laravel Artisan** (`ryannaddy.laravel-artisan`) - jalankan perintah artisan dari VS Code
+- **Laravel Blade Snippets** (`onecentlin.laravel-blade`) - syntax highlight untuk Blade template
 
 **Untuk Frontend (Vue / JS):**
-- **Vue - Official** (`Vue.volar`) — dukungan Vue 3, syntax highlight, IntelliSense
-- **Tailwind CSS IntelliSense** (`bradlc.vscode-tailwindcss`) — autocomplete class Tailwind
-- **ESLint** (`dbaeumer.vscode-eslint`) — linting JavaScript
+- **Vue - Official** (`Vue.volar`) - dukungan Vue 3, syntax highlight, IntelliSense
+- **Tailwind CSS IntelliSense** (`bradlc.vscode-tailwindcss`) - autocomplete class Tailwind
+- **ESLint** (`dbaeumer.vscode-eslint`) - linting JavaScript
 
 **Umum:**
-- **GitLens** (`eamodio.gitlens`) — fitur Git yang lebih lengkap
-- **Thunder Client** (`rangav.vscode-thunder-client`) — test API langsung dari VS Code (pengganti Postman)
-- **DotENV** (`mikestead.dotenv`) — syntax highlight untuk file `.env`
+- **GitLens** (`eamodio.gitlens`) - fitur Git yang lebih lengkap
+- **Thunder Client** (`rangav.vscode-thunder-client`) - test API langsung dari VS Code (pengganti Postman)
+- **DotENV** (`mikestead.dotenv`) - syntax highlight untuk file `.env`
 
 ---
 
