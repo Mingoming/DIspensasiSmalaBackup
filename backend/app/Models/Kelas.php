@@ -28,4 +28,9 @@ class Kelas extends Model
     {
         return $this->hasMany(Dispensasi::class);
     }
+
+    public function jadwalMengajar()
+    {
+        return $this->hasMany(JadwalMengajar::class);
+    }
 }

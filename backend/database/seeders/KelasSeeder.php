@@ -26,7 +26,10 @@ class KelasSeeder extends Seeder
         ];
 
         foreach ($kelasData as $kelas) {
-            Kelas::create($kelas);
+            Kelas::updateOrCreate(
+                ['nama_kelas' => $kelas['nama_kelas']],
+                $kelas
+            );
         }
     }
 }

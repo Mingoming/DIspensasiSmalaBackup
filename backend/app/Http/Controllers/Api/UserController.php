@@ -81,23 +81,19 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'required|in:siswa,guru,kesiswaan,admin',
+            'roles' => 'nullable|array',
+            'roles.*' => 'in:admin,kesiswaan,guru_mapel',
             'nisn' => 'required_if:role,siswa|nullable|string',
-            'nip' => 'required_if:role,guru,admin|nullable|string',
+            'nip' => 'required_if:role,guru,kesiswaan,admin|nullable|string',
             'mata_pelajaran' => 'nullable|string',
             'kelas_id' => 'required_if:role,siswa|nullable|exists:kelas,id',
             'no_telepon' => 'nullable|string',
         ]);
 
-        $user = User::create([
+        $user = User::create($this->userDataFromRequest($request) + [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'nisn' => $request->nisn,
-            'nip' => $request->nip,
-            'mata_pelajaran' => $request->mata_pelajaran,
-            'kelas_id' => $request->kelas_id,
-            'no_telepon' => $request->no_telepon,
         ]);
 
         // Attach roles if guru/admin
@@ -156,22 +152,18 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:8',
             'role' => 'required|in:siswa,guru,kesiswaan,admin',
+            'roles' => 'nullable|array',
+            'roles.*' => 'in:admin,kesiswaan,guru_mapel',
             'nisn' => 'required_if:role,siswa|nullable|string',
-            'nip' => 'required_if:role,guru,admin|nullable|string',
+            'nip' => 'required_if:role,guru,kesiswaan,admin|nullable|string',
             'mata_pelajaran' => 'nullable|string',
             'kelas_id' => 'required_if:role,siswa|nullable|exists:kelas,id',
             'no_telepon' => 'nullable|string',
         ]);
 
-        $data = [
+        $data = $this->userDataFromRequest($request) + [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
-            'nisn' => $request->nisn,
-            'nip' => $request->nip,
-            'mata_pelajaran' => $request->mata_pelajaran,
-            'kelas_id' => $request->kelas_id,
-            'no_telepon' => $request->no_telepon,
         ];
 
         // Update password only if provided
@@ -282,9 +274,11 @@ class UserController extends Controller
         $stats = [
             'total_users' => User::count(),
             'total_siswa' => User::where('role', 'siswa')->count(),
-            'total_guru' => User::where('role', 'guru')->count(),
-            'total_kesiswaan' => User::where('role', 'kesiswaan')->count(),
-            'total_admin' => User::where('role', 'admin')->count(),
+            'total_guru' => User::where('role', 'guru')
+                ->orWhereHas('roles', fn ($query) => $query->where('name', 'guru_mapel'))
+                ->count(),
+            'total_kesiswaan' => User::whereHas('roles', fn ($query) => $query->where('name', 'kesiswaan'))->count(),
+            'total_admin' => User::whereHas('roles', fn ($query) => $query->where('name', 'admin'))->count(),
             'users_this_month' => User::whereMonth('created_at', now()->month)->count(),
         ];
 
@@ -293,15 +287,58 @@ class UserController extends Controller
 
     private function syncUserRoles(User $user, Request $request): void
     {
-        $roleNames = match ($request->role) {
+        $roleNames = $this->requestedRoleNames($request);
+        $roleIds = Role::whereIn('name', $roleNames)->pluck('id')->toArray();
+
+        $user->roles()->sync($roleIds);
+    }
+
+    private function requestedRoleNames(Request $request): array
+    {
+        if ($request->role === 'siswa') {
+            return [];
+        }
+
+        $defaultRoleNames = match ($request->role) {
             'admin' => ['admin'],
             'kesiswaan' => ['kesiswaan'],
             'guru' => ['guru_mapel'],
             default => [],
         };
 
-        $roleIds = Role::whereIn('name', $roleNames)->pluck('id')->toArray();
+        $requestedRoleNames = $request->input('roles', []);
 
-        $user->roles()->sync($roleIds);
+        if (!is_array($requestedRoleNames) || empty($requestedRoleNames)) {
+            $requestedRoleNames = [];
+        }
+
+        return array_values(array_unique(array_merge($defaultRoleNames, $requestedRoleNames)));
+    }
+
+    private function userDataFromRequest(Request $request): array
+    {
+        $data = [
+            'role' => $request->role,
+            'nisn' => null,
+            'nip' => null,
+            'mata_pelajaran' => null,
+            'kelas_id' => null,
+            'no_telepon' => $request->no_telepon,
+        ];
+
+        if ($request->role === 'siswa') {
+            $data['nisn'] = $request->nisn;
+            $data['kelas_id'] = $request->kelas_id;
+
+            return $data;
+        }
+
+        $data['nip'] = $request->nip;
+
+        if (in_array('guru_mapel', $this->requestedRoleNames($request), true)) {
+            $data['mata_pelajaran'] = $request->mata_pelajaran;
+        }
+
+        return $data;
     }
 }

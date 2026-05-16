@@ -12,4 +12,13 @@ class MataPelajaran extends Model
         'nama',
         'aktif',
     ];
+
+    protected $casts = [
+        'aktif' => 'boolean',
+    ];
+
+    public function jadwalMengajar()
+    {
+        return $this->hasMany(JadwalMengajar::class);
+    }
 }

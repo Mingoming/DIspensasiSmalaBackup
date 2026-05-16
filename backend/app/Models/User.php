@@ -124,6 +124,16 @@ class User extends Authenticatable
         return $this->hasMany(Dispensasi::class, 'approved_by');
     }
 
+    public function jadwalMengajar()
+    {
+        return $this->hasMany(JadwalMengajar::class, 'user_id');
+    }
+
+    public function canExportDispensasi()
+    {
+        return $this->hasAnyRole(['admin', 'kesiswaan']);
+    }
+
     public function canViewAllDispensasi()
     {
         return $this->hasAnyRole(['admin', 'kesiswaan', 'guru_mapel']);

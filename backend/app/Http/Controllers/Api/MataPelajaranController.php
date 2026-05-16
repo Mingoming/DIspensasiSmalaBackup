@@ -70,7 +70,15 @@ class MataPelajaranController extends Controller
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        MataPelajaran::findOrFail($id)->delete();
+        $mapel = MataPelajaran::withCount('jadwalMengajar')->findOrFail($id);
+
+        if ($mapel->jadwal_mengajar_count > 0) {
+            return response()->json([
+                'message' => 'Mata pelajaran tidak bisa dihapus karena masih digunakan di jadwal mengajar.',
+            ], 422);
+        }
+
+        $mapel->delete();
 
         return response()->json([
             'message' => 'Mata pelajaran berhasil dihapus',

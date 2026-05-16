@@ -76,11 +76,17 @@ class KelasController extends Controller
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        $kelas = Kelas::withCount('siswa')->findOrFail($id);
+        $kelas = Kelas::withCount(['siswa', 'jadwalMengajar'])->findOrFail($id);
 
         if ($kelas->siswa_count > 0) {
             return response()->json([
                 'message' => 'Kelas tidak bisa dihapus karena masih memiliki siswa.',
+            ], 422);
+        }
+
+        if ($kelas->jadwal_mengajar_count > 0) {
+            return response()->json([
+                'message' => 'Kelas tidak bisa dihapus karena masih memiliki jadwal mengajar.',
             ], 422);
         }
 

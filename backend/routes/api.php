@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\BackupController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\MataPelajaranController;
+use App\Http\Controllers\Api\JadwalMengajarController;
 
 /*
 |--------------------------------------------------------------------------
@@ -74,6 +75,7 @@ Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
 
     //CRUD admin
     Route::apiResource('/mata-pelajaran', MataPelajaranController::class);
+    Route::apiResource('/jadwal-mengajar', JadwalMengajarController::class);
 
     // Get jam pelajaran list
     Route::get('/config/jam-pelajaran', function() {
