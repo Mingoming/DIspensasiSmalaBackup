@@ -105,12 +105,7 @@ class User extends Authenticatable
     // Helper method: Cek apakah bisa approve dispensasi
     public function canApproveDispensasi()
     {
-        return $this->hasAnyRole(['admin', 'kesiswaan']);
-    }
-
-    public function canViewAllDispensasi()
-    {
-        return $this->canApproveDispensasi();
+        return $this->hasAnyRole(['kesiswaan']);
     }
 
     // Relasi lainnya (existing)
@@ -127,5 +122,10 @@ class User extends Authenticatable
     public function dispensasiApproved()
     {
         return $this->hasMany(Dispensasi::class, 'approved_by');
+    }
+
+    public function canViewAllDispensasi()
+    {
+        return $this->hasAnyRole(['admin', 'kesiswaan', 'guru_mapel']);
     }
 }
