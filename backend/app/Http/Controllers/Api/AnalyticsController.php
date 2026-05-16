@@ -131,11 +131,27 @@ class AnalyticsController extends Controller
         $this->authorizeAnalytics($request);
         $limit = $request->get('limit', 10);
 
-        $data = Dispensasi::select('mata_pelajaran', DB::raw('COUNT(*) as total'))
-            ->groupBy('mata_pelajaran')
-            ->orderBy('total', 'desc')
-            ->limit($limit)
-            ->get();
+        $counts = [];
+
+        Dispensasi::query()
+            ->pluck('mata_pelajaran')
+            ->each(function ($mataPelajaran) use (&$counts) {
+                foreach ($this->splitMataPelajaran($mataPelajaran) as $mapel) {
+                    $counts[$mapel] = ($counts[$mapel] ?? 0) + 1;
+                }
+            });
+
+        $data = collect($counts)
+            ->map(fn ($total, $mataPelajaran) => [
+                'mata_pelajaran' => $mataPelajaran,
+                'total' => $total,
+            ])
+            ->sort(function ($a, $b) {
+                return $b['total'] <=> $a['total']
+                    ?: strcmp($a['mata_pelajaran'], $b['mata_pelajaran']);
+            })
+            ->take($limit)
+            ->values();
 
         return response()->json([
             'data' => $data,
@@ -171,6 +187,17 @@ class AnalyticsController extends Controller
                 'message' => 'Unauthorized. Hanya admin dan kesiswaan yang bisa melihat analytics.',
             ], 403));
         }
+    }
+
+    private function splitMataPelajaran(?string $mataPelajaran): array
+    {
+        if (!$mataPelajaran) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map('trim', explode(',', $mataPelajaran))
+        ));
     }
 
 }

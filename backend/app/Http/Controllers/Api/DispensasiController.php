@@ -15,20 +15,14 @@ class DispensasiController extends Controller
     {
         $user = $request->user();
 
-        // Admin & Kesiswaan: lihat semua
-        if ($user->canViewAllDispensasi()) {
-            $dispensasi = Dispensasi::with(['siswa', 'kelas', 'approver'])
-                ->latest()
-                ->get();
-        } else {
-            $dispensasi = Dispensasi::with(['siswa', 'kelas', 'approver'])
-                ->where('user_id', $user->id)
-                ->latest()
-                ->get();
+        $query = Dispensasi::with(['siswa', 'kelas', 'approver'])->latest();
+
+        if (!$user->canViewAllDispensasi()) {
+            $query->where('user_id', $user->id);
         }
 
         return response()->json([
-            'data' => $dispensasi,
+            'data' => $query->get(),
         ]);
     }
 
@@ -41,14 +35,20 @@ class DispensasiController extends Controller
             ], 403);
         }
 
+        $request->merge([
+            'mata_pelajaran' => $this->normalizeMataPelajaranInput($request->input('mata_pelajaran')),
+        ]);
+
         $data = $request->validate([
             'tanggal' => 'required|date',
             'jam_pelajaran_mulai' => 'required|integer|min:1|max:8',
             'jam_pelajaran_selesai' => 'required|integer|min:1|max:8|gte:jam_pelajaran_mulai',
-            'mata_pelajaran' => 'required|string',
+            'mata_pelajaran' => 'required|array|min:1',
+            'mata_pelajaran.*' => 'required|string|max:100',
             'keperluan' => 'required|string',
             'surat_dispensasi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+        $data['mata_pelajaran'] = implode(', ', array_unique($data['mata_pelajaran']));
 
         $data['user_id'] = $request->user()->id;
         $data['kelas_id'] = $request->user()->kelas_id;
@@ -118,14 +118,20 @@ class DispensasiController extends Controller
             ], 400);
         }
 
+        $request->merge([
+            'mata_pelajaran' => $this->normalizeMataPelajaranInput($request->input('mata_pelajaran')),
+        ]);
+
         $data = $request->validate([
             'tanggal' => 'required|date',
             'jam_pelajaran_mulai' => 'required|integer|min:1|max:8',
             'jam_pelajaran_selesai' => 'required|integer|min:1|max:8|gte:jam_pelajaran_mulai',
-            'mata_pelajaran' => 'required|string',
+            'mata_pelajaran' => 'required|array|min:1',
+            'mata_pelajaran.*' => 'required|string|max:100',
             'keperluan' => 'required|string',
             'surat_dispensasi' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
+        $data['mata_pelajaran'] = implode(', ', array_unique($data['mata_pelajaran']));
 
         // Upload file baru jika ada
         if ($request->hasFile('surat_dispensasi')) {
@@ -198,13 +204,12 @@ class DispensasiController extends Controller
         ]);
     }
 
-    // Approve/Reject Dispensasi (Guru/Admin)
+    // Approve/Reject Dispensasi (Kesiswaan)
     public function updateStatus(Request $request, $id)
     {
         $user = $request->user();
 
-        // Cek apakah bisa approve (admin atau kesiswaan)
-        if (!$user->hasRole('kesiswaan')) {
+        if (!$user->canApproveDispensasi()) {
             return response()->json([
                 'message' => 'Unauthorized. Hanya Kesiswaan yang bisa approve.',
             ], 403);
@@ -239,5 +244,18 @@ class DispensasiController extends Controller
             'message' => 'Status dispensasi berhasil diperbarui',
             'data' => $dispensasi->load(['siswa', 'kelas', 'approver']),
         ]);
+    }
+
+    private function normalizeMataPelajaranInput($value): array
+    {
+        if (is_array($value)) {
+            $items = $value;
+        } elseif (is_string($value)) {
+            $items = explode(',', $value);
+        } else {
+            $items = [];
+        }
+
+        return array_values(array_filter(array_map('trim', $items)));
     }
 }
