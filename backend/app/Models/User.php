@@ -47,6 +47,10 @@ class User extends Authenticatable
     // Helper method: Cek apakah user punya role tertentu
     public function hasRole($roleName)
     {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->contains('name', $roleName);
+        }
+
         return $this->roles()->where('name', $roleName)->exists();
     }
 
@@ -57,13 +61,11 @@ class User extends Authenticatable
             return $this->hasRole($roles);
         }
 
-        foreach ($roles as $role) {
-            if ($this->hasRole($role)) {
-                return true;
-            }
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->whereIn('name', $roles)->isNotEmpty();
         }
 
-        return false;
+        return $this->roles()->whereIn('name', $roles)->exists();
     }
 
     // Helper method: Get semua nama roles

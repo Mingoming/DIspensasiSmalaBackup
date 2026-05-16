@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -20,7 +21,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|in:siswa,guru',
             'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,name',
+            'roles.*' => 'in:guru_mapel',
             'nisn' => 'required_if:role,siswa|nullable|string',
             'nip' => 'required_if:role,guru|nullable|string',
             'mata_pelajaran' => 'nullable|string',
@@ -40,10 +41,9 @@ class AuthController extends Controller
             'no_telepon' => $request->no_telepon,
         ]);
 
-        // Attach roles jika guru dan ada roles yang dipilih
-        if ($request->role === 'guru' && $request->has('roles') && !empty($request->roles)) {
-            $roleIds = \App\Models\Role::whereIn('name', $request->roles)->pluck('id');
-            $user->roles()->attach($roleIds);
+        if ($request->role === 'guru') {
+            $roleIds = Role::where('name', 'guru_mapel')->pluck('id');
+            $user->roles()->sync($roleIds);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

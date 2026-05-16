@@ -302,7 +302,16 @@ class DispensasiController extends Controller
             return collect();
         }
 
-        $query->whereIn('kelas_id', $schedules->pluck('kelas_id')->unique()->values());
+        $query->where(function ($outerQuery) use ($schedules) {
+            foreach ($schedules as $schedule) {
+                $outerQuery->orWhere(function ($scheduleQuery) use ($schedule) {
+                    $scheduleQuery
+                        ->where('kelas_id', $schedule->kelas_id)
+                        ->where('jam_pelajaran_mulai', '<=', $schedule->jam_pelajaran_selesai)
+                        ->where('jam_pelajaran_selesai', '>=', $schedule->jam_pelajaran_mulai);
+                });
+            }
+        });
 
         return $query->get()
             ->filter(fn (Dispensasi $dispensasi) => $this->matchingSchedulesForDispensasi($dispensasi, $schedules)->isNotEmpty())
