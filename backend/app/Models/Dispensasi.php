@@ -22,7 +22,7 @@ class Dispensasi extends Model
         'surat_dispensasi',
         'status',
         'approved_by',
-        'catatan'
+        'catatan',
     ];
 
     protected $casts = [
@@ -81,4 +81,5 @@ class Dispensasi extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
 }

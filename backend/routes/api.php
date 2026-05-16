@@ -70,11 +70,12 @@ Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
     Route::put('/dispensasi/{id}', [DispensasiController::class, 'update']);
     Route::delete('/dispensasi/{id}', [DispensasiController::class, 'destroy']);
 
-    // Approve/Reject (Guru only)
+    // Approve/Reject (Kesiswaan)
     Route::put('/dispensasi/{id}/status', [DispensasiController::class, 'updateStatus']);
 
     //CRUD admin
     Route::apiResource('/mata-pelajaran', MataPelajaranController::class);
+    Route::get('/jadwal-terdampak', [JadwalMengajarController::class, 'affectedSchedules']);
     Route::apiResource('/jadwal-mengajar', JadwalMengajarController::class);
 
     // Get jam pelajaran list

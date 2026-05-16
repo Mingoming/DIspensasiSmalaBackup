@@ -39,4 +39,5 @@ class JadwalMengajar extends Model
     {
         return $this->belongsTo(MataPelajaran::class, 'mata_pelajaran_id');
     }
+
 }

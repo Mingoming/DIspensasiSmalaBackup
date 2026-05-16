@@ -136,6 +136,6 @@ class User extends Authenticatable
 
     public function canViewAllDispensasi()
     {
-        return $this->hasAnyRole(['admin', 'kesiswaan', 'guru_mapel']);
+        return $this->hasAnyRole(['admin', 'kesiswaan']);
     }
 }

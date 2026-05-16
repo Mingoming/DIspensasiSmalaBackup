@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dispensasi;
+use App\Models\JadwalMengajar;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\AuditLog;
@@ -15,14 +19,19 @@ class DispensasiController extends Controller
     {
         $user = $request->user();
 
-        $query = Dispensasi::with(['siswa', 'kelas', 'approver'])->latest();
+        $query = Dispensasi::with($this->dispensasiRelations())->latest();
 
-        if (!$user->canViewAllDispensasi()) {
+        if ($user->canViewAllDispensasi()) {
+            $data = $query->get();
+        } elseif ($user->isGuru()) {
+            $data = $this->getGuruDispensasi($query, $user);
+        } else {
             $query->where('user_id', $user->id);
+            $data = $query->get();
         }
 
         return response()->json([
-            'data' => $query->get(),
+            'data' => $data,
         ]);
     }
 
@@ -84,12 +93,16 @@ class DispensasiController extends Controller
     {
         $user = $request->user();
 
-        $dispensasi = Dispensasi::with(['siswa', 'kelas', 'approver'])->findOrFail($id);
+        $dispensasi = Dispensasi::with($this->dispensasiRelations())->findOrFail($id);
 
-        if (!$user->canViewAllDispensasi() && $dispensasi->user_id !== $user->id) {
+        if (!$this->canViewDispensasi($user, $dispensasi)) {
             return response()->json([
                 'message' => 'Unauthorized',
             ], 403);
+        }
+
+        if ($user->isGuru()) {
+            $this->attachGuruScheduleContext($dispensasi, $user);
         }
 
         return response()->json([
@@ -257,5 +270,100 @@ class DispensasiController extends Controller
         }
 
         return array_values(array_filter(array_map('trim', $items)));
+    }
+
+    private function dispensasiRelations(): array
+    {
+        return [
+            'siswa',
+            'kelas',
+            'approver',
+        ];
+    }
+
+    private function canViewDispensasi(User $user, Dispensasi $dispensasi): bool
+    {
+        if ($user->canViewAllDispensasi() || $dispensasi->user_id === $user->id) {
+            return true;
+        }
+
+        if (!$user->isGuru()) {
+            return false;
+        }
+
+        return $this->matchingSchedulesForDispensasi($dispensasi, $this->guruSchedules($user))->isNotEmpty();
+    }
+
+    private function getGuruDispensasi($query, User $user)
+    {
+        $schedules = $this->guruSchedules($user);
+
+        if ($schedules->isEmpty()) {
+            return collect();
+        }
+
+        $query->whereIn('kelas_id', $schedules->pluck('kelas_id')->unique()->values());
+
+        return $query->get()
+            ->filter(fn (Dispensasi $dispensasi) => $this->matchingSchedulesForDispensasi($dispensasi, $schedules)->isNotEmpty())
+            ->values()
+            ->each(fn (Dispensasi $dispensasi) => $this->attachGuruScheduleContext($dispensasi, $user, $schedules));
+    }
+
+    private function attachGuruScheduleContext(Dispensasi $dispensasi, User $user, ?EloquentCollection $schedules = null): void
+    {
+        $dispensasi->setRelation(
+            'jadwalMengajarGuru',
+            $this->matchingSchedulesForDispensasi($dispensasi, $schedules ?? $this->guruSchedules($user))->values()
+        );
+    }
+
+    private function matchingSchedulesForDispensasi(Dispensasi $dispensasi, EloquentCollection $schedules)
+    {
+        return $schedules->filter(
+            fn (JadwalMengajar $jadwal) => $this->dispensasiMatchesSchedule($dispensasi, $jadwal)
+        );
+    }
+
+    private function dispensasiMatchesSchedule(Dispensasi $dispensasi, JadwalMengajar $jadwal): bool
+    {
+        return $dispensasi->kelas_id === $jadwal->kelas_id
+            && $this->hariFromDate($dispensasi->tanggal) === $jadwal->hari
+            && $dispensasi->jam_pelajaran_mulai <= $jadwal->jam_pelajaran_selesai
+            && $dispensasi->jam_pelajaran_selesai >= $jadwal->jam_pelajaran_mulai
+            && in_array(
+                strtolower($jadwal->mataPelajaran?->nama ?? ''),
+                $this->mataPelajaranNames($dispensasi),
+                true
+            );
+    }
+
+    private function guruSchedules(User $user): EloquentCollection
+    {
+        return $user->jadwalMengajar()
+            ->with(['kelas', 'mataPelajaran'])
+            ->get();
+    }
+
+    private function mataPelajaranNames(Dispensasi $dispensasi): array
+    {
+        return collect(explode(',', $dispensasi->mata_pelajaran))
+            ->map(fn (string $mapel) => strtolower(trim($mapel)))
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    private function hariFromDate($date): string
+    {
+        return [
+            0 => 'minggu',
+            1 => 'senin',
+            2 => 'selasa',
+            3 => 'rabu',
+            4 => 'kamis',
+            5 => 'jumat',
+            6 => 'sabtu',
+        ][Carbon::parse($date)->dayOfWeek];
     }
 }

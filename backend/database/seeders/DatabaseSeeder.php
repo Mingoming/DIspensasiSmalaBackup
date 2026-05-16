@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             MataPelajaranSeeder::class,
             UserSeeder::class,
+            JadwalMengajarSeeder::class,
         ]);
     }
 }
