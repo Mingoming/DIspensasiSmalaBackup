@@ -13,12 +13,12 @@ const dispensasi = ref(null)
 const loading = ref(true)
 const error = ref('')
 
-const approvalForm = ref({ status: '', catatan: '' })
+const approvalForm = ref({ catatan: '' })
 const submittingApproval = ref(false)
 
 const user = computed(() => authStore.user)
 const canApprove = computed(() =>
-  authStore.hasRole && authStore.hasRole('kesiswaan') && dispensasi.value?.status === 'pending'
+  authStore.canApprove && dispensasi.value?.status === 'pending'
 )
 const canEdit = computed(() =>
   user.value?.role === 'siswa' &&
@@ -26,6 +26,9 @@ const canEdit = computed(() =>
   dispensasi.value?.status === 'pending'
 )
 const canDelete = computed(() => canEdit.value)
+const storageBaseUrl = computed(() =>
+  (api.defaults.baseURL || 'http://127.0.0.1:8000/api').replace(/\/api\/?$/, '')
+)
 
 function formatDate(date) {
   if (!date) return '-'
@@ -78,6 +81,10 @@ async function handleDelete() {
   } catch (err) {
     error.value = err.response?.data?.message || 'Gagal menghapus dispensasi'
   }
+}
+
+function getStorageUrl(path) {
+  return `${storageBaseUrl.value}/storage/${path}`
 }
 
 function getStatusBadgeClass(status) {
@@ -254,7 +261,7 @@ onMounted(() => fetchDispensasi())
             <div v-if="dispensasi.surat_dispensasi">
               <p class="text-xs text-gray-400 font-medium mb-2">Surat Dispensasi</p>
               <a
-                :href="`http://127.0.0.1:8000/storage/${dispensasi.surat_dispensasi}`"
+                :href="getStorageUrl(dispensasi.surat_dispensasi)"
                 target="_blank"
                 class="inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
               >
@@ -313,8 +320,8 @@ onMounted(() => fetchDispensasi())
           </div>
           <div class="p-6">
             <p class="text-sm text-gray-500 mb-4">
-              Anda memiliki hak untuk approve/reject sebagai
-              <span class="font-semibold text-gray-700">{{ authStore.getRoleDisplayNames?.join(', ') }}</span>
+              Anda memiliki hak untuk approve/reject karena memiliki role
+              <span class="font-semibold text-gray-700">Kesiswaan</span>
             </p>
             <div class="mb-4">
               <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">

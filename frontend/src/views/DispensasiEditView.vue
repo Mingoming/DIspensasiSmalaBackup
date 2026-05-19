@@ -13,7 +13,7 @@ const form = ref({
   tanggal: '',
   jam_pelajaran_mulai: '',
   jam_pelajaran_selesai: '',
-  mata_pelajaran: '',
+  mata_pelajaran: [],
   keperluan: '',
   surat_dispensasi: null
 })
@@ -26,6 +26,12 @@ const submitting = ref(false)
 const error = ref('')
 const success = ref('')
 const newFileName = ref('')
+
+function parseMataPelajaran(value) {
+  if (Array.isArray(value)) return value
+  if (!value) return []
+  return value.split(',').map(item => item.trim()).filter(Boolean)
+}
 
 async function fetchConfig() {
   try {
@@ -58,7 +64,7 @@ async function fetchDispensasi() {
     form.value.tanggal = data.tanggal
     form.value.jam_pelajaran_mulai = data.jam_pelajaran_mulai
     form.value.jam_pelajaran_selesai = data.jam_pelajaran_selesai
-    form.value.mata_pelajaran = data.mata_pelajaran
+    form.value.mata_pelajaran = parseMataPelajaran(data.mata_pelajaran)
     form.value.keperluan = data.keperluan
     existingFile.value = data.surat_dispensasi
   } catch (err) {
@@ -80,12 +86,19 @@ async function handleSubmit() {
       submitting.value = false
       return
     }
+    if (form.value.mata_pelajaran.length === 0) {
+      error.value = 'Pilih minimal satu mata pelajaran'
+      submitting.value = false
+      return
+    }
 
     const formData = new FormData()
     formData.append('tanggal', form.value.tanggal)
     formData.append('jam_pelajaran_mulai', form.value.jam_pelajaran_mulai)
     formData.append('jam_pelajaran_selesai', form.value.jam_pelajaran_selesai)
-    formData.append('mata_pelajaran', form.value.mata_pelajaran)
+    form.value.mata_pelajaran.forEach(mapel => {
+      formData.append('mata_pelajaran[]', mapel)
+    })
     formData.append('keperluan', form.value.keperluan)
     formData.append('_method', 'PUT')
     if (form.value.surat_dispensasi) {
@@ -302,22 +315,32 @@ onMounted(() => {
                   <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
                     Mata Pelajaran yang Ditinggalkan <span class="text-red-500 normal-case font-normal">*</span>
                   </label>
-                  <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                    </div>
-                    <select
-                      v-model="form.mata_pelajaran"
-                      required
-                      class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition bg-white appearance-none"
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <label
+                      v-for="mapel in mataPelajaranList"
+                      :key="mapel"
+                      :class="form.mata_pelajaran.includes(mapel)
+                        ? 'border-amber-400 bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-amber-200 hover:bg-amber-50/40'"
+                      class="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition cursor-pointer"
                     >
-                      <option value="">Pilih Mata Pelajaran</option>
-                      <option v-for="mapel in mataPelajaranList" :key="mapel" :value="mapel">
-                        {{ mapel }}
-                      </option>
-                    </select>
+                      <input
+                        v-model="form.mata_pelajaran"
+                        type="checkbox"
+                        :value="mapel"
+                        class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-400"
+                      />
+                      <span>{{ mapel }}</span>
+                    </label>
+                  </div>
+                  <div v-if="form.mata_pelajaran.length" class="flex flex-wrap gap-2 mt-2">
+                    <span
+                      v-for="mapel in form.mata_pelajaran"
+                      :key="mapel"
+                      class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100"
+                    >
+                      {{ mapel }}
+                    </span>
                   </div>
                 </div>
 

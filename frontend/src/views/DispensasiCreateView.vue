@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AppNavbar from '@/components/AppNavbar.vue'
@@ -13,13 +13,15 @@ const form = ref({
   tanggal: '',
   jam_pelajaran_mulai: '',
   jam_pelajaran_selesai: '',
-  mata_pelajaran: '',
+  mata_pelajaran: [],
   keperluan: '',
   surat_dispensasi: null
 })
 
 const mataPelajaranList = ref([])
 const jamPelajaranList = ref({})
+const jadwalTerdampak = ref([])
+const loadingJadwal = ref(false)
 const loading = ref(false)
 const error = ref('')
 const success = ref('')
@@ -38,6 +40,36 @@ async function fetchConfig() {
   }
 }
 
+async function fetchJadwalTerdampak() {
+  if (
+    !form.value.tanggal ||
+    !form.value.jam_pelajaran_mulai ||
+    !form.value.jam_pelajaran_selesai ||
+    parseInt(form.value.jam_pelajaran_mulai) > parseInt(form.value.jam_pelajaran_selesai)
+  ) {
+    jadwalTerdampak.value = []
+    return
+  }
+
+  loadingJadwal.value = true
+  try {
+    const response = await api.get('/jadwal-terdampak', {
+      params: {
+        tanggal: form.value.tanggal,
+        jam_pelajaran_mulai: form.value.jam_pelajaran_mulai,
+        jam_pelajaran_selesai: form.value.jam_pelajaran_selesai
+      }
+    })
+
+    jadwalTerdampak.value = response.data.data
+    form.value.mata_pelajaran = response.data.mata_pelajaran || []
+  } catch (err) {
+    console.error('Error fetching jadwal terdampak:', err)
+  } finally {
+    loadingJadwal.value = false
+  }
+}
+
 async function handleSubmit() {
   error.value = ''
   success.value = ''
@@ -49,12 +81,19 @@ async function handleSubmit() {
       loading.value = false
       return
     }
+    if (form.value.mata_pelajaran.length === 0) {
+      error.value = 'Pilih minimal satu mata pelajaran'
+      loading.value = false
+      return
+    }
 
     const formData = new FormData()
     formData.append('tanggal', form.value.tanggal)
     formData.append('jam_pelajaran_mulai', form.value.jam_pelajaran_mulai)
     formData.append('jam_pelajaran_selesai', form.value.jam_pelajaran_selesai)
-    formData.append('mata_pelajaran', form.value.mata_pelajaran)
+    form.value.mata_pelajaran.forEach(mapel => {
+      formData.append('mata_pelajaran[]', mapel)
+    })
     formData.append('keperluan', form.value.keperluan)
     if (form.value.surat_dispensasi) {
       formData.append('surat_dispensasi', form.value.surat_dispensasi)
@@ -107,6 +146,11 @@ onMounted(() => {
   fetchConfig()
   form.value.tanggal = getTodayForInput()
 })
+
+watch(
+  () => [form.value.tanggal, form.value.jam_pelajaran_mulai, form.value.jam_pelajaran_selesai],
+  fetchJadwalTerdampak
+)
 </script>
 
 <template>
@@ -260,27 +304,62 @@ onMounted(() => {
               </h2>
               <div class="space-y-4">
 
+                <!-- Jadwal terdampak -->
+                <div>
+                  <div class="flex items-center justify-between gap-3 mb-2">
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                      Jadwal Terdampak
+                    </label>
+                    <span v-if="loadingJadwal" class="text-xs text-gray-400">Memuat...</span>
+                  </div>
+                  <div v-if="jadwalTerdampak.length" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div
+                      v-for="jadwal in jadwalTerdampak"
+                      :key="jadwal.id"
+                      class="border border-primary-100 bg-primary-50/50 rounded-lg px-3 py-2.5"
+                    >
+                      <p class="text-sm font-semibold text-gray-800">{{ jadwal.mata_pelajaran?.nama || '-' }}</p>
+                      <p class="text-xs text-gray-500 mt-0.5">
+                        Jam {{ jadwal.jam_pelajaran_mulai }}-{{ jadwal.jam_pelajaran_selesai }} · {{ jadwal.guru?.name || '-' }}
+                      </p>
+                    </div>
+                  </div>
+                  <p v-else class="text-sm text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2.5">
+                    Pilih tanggal dan rentang jam untuk menghitung mata pelajaran yang dilewati.
+                  </p>
+                </div>
+
                 <!-- Mata Pelajaran -->
                 <div>
                   <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
                     Mata Pelajaran yang Ditinggalkan <span class="text-red-500 normal-case font-normal">*</span>
                   </label>
-                  <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                    </div>
-                    <select
-                      v-model="form.mata_pelajaran"
-                      required
-                      class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition bg-white appearance-none"
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <label
+                      v-for="mapel in mataPelajaranList"
+                      :key="mapel"
+                      :class="form.mata_pelajaran.includes(mapel)
+                        ? 'border-primary-400 bg-primary-50 text-primary-700 ring-1 ring-primary-200'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-primary-200 hover:bg-primary-50/40'"
+                      class="flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition cursor-pointer"
                     >
-                      <option value="">Pilih Mata Pelajaran</option>
-                      <option v-for="mapel in mataPelajaranList" :key="mapel" :value="mapel">
-                        {{ mapel }}
-                      </option>
-                    </select>
+                      <input
+                        v-model="form.mata_pelajaran"
+                        type="checkbox"
+                        :value="mapel"
+                        class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-400"
+                      />
+                      <span>{{ mapel }}</span>
+                    </label>
+                  </div>
+                  <div v-if="form.mata_pelajaran.length" class="flex flex-wrap gap-2 mt-2">
+                    <span
+                      v-for="mapel in form.mata_pelajaran"
+                      :key="mapel"
+                      class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-100"
+                    >
+                      {{ mapel }}
+                    </span>
                   </div>
                 </div>
 

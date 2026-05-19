@@ -1,11 +1,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AppNavbar from '@/components/AppNavbar.vue'
 import api from '@/services/api'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const dispensasiList = ref([])
@@ -19,7 +17,7 @@ const searchQuery = ref('')
 const exporting = ref(false)
 
 const user = computed(() => authStore.user)
-const canExport = computed(() => authStore.hasRole && authStore.hasRole('kesiswaan'))
+const canExport = computed(() => authStore.isAdmin || authStore.hasRole('kesiswaan'))
 
 function formatDateIndo(date) {
   if (!date) return '-'
