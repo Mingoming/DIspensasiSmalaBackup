@@ -5,7 +5,8 @@ import api from '@/services/api'
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const token = ref(localStorage.getItem('token') || null)
-  const isAuthenticated = ref(!!token.value)
+  const initialized = ref(false)
+  const isAuthenticated = computed(() => !!token.value && !!user.value)
 
   // Set token ke axios headers
   if (token.value) {
@@ -24,7 +25,8 @@ export const useAuthStore = defineStore('auth', () => {
   const isAdmin = computed(() => hasRole('admin'))
   const isKesiswaan = computed(() => hasRole('kesiswaan'))
   const isGuruMapel = computed(() => hasRole('guru_mapel'))
-  const canApprove = computed(() => hasAnyRole(['admin', 'kesiswaan']))
+  const canApprove = computed(() => hasRole('kesiswaan'))
+  const canViewAnalytics = computed(() => hasAnyRole(['admin', 'kesiswaan']))
 
   // Get role display names
   const getRoleDisplayNames = computed(() => {
@@ -39,26 +41,6 @@ export const useAuthStore = defineStore('auth', () => {
       
       token.value = response.data.token
       user.value = response.data.user
-      isAuthenticated.value = true
-      
-      localStorage.setItem('token', response.data.token)
-      api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-      
-      return response.data
-    } catch (error) {
-      throw error
-    }
-  }
-
-  // Register
-  async function register(userData) {
-    try {
-      const response = await api.post('/register', userData)
-      
-      token.value = response.data.token
-      user.value = response.data.user
-      isAuthenticated.value = true
-      
       localStorage.setItem('token', response.data.token)
       api.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
       
@@ -77,7 +59,6 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       token.value = null
       user.value = null
-      isAuthenticated.value = false
       
       localStorage.removeItem('token')
       delete api.defaults.headers.common['Authorization']
@@ -89,15 +70,32 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await api.get('/profile')
       user.value = response.data.user
+      return response.data.user
     } catch (error) {
       console.error('Fetch profile error:', error)
-      logout()
+      await logout()
+      return null
     }
+  }
+
+  async function initializeAuth() {
+    if (initialized.value) return user.value
+
+    if (!token.value) {
+      initialized.value = true
+      return null
+    }
+
+    const currentUser = await fetchProfile()
+    initialized.value = true
+
+    return currentUser
   }
 
   return {
     user,
     token,
+    initialized,
     isAuthenticated,
     isSiswa,
     isGuru,
@@ -105,12 +103,13 @@ export const useAuthStore = defineStore('auth', () => {
     isKesiswaan,
     isGuruMapel,
     canApprove,
+    canViewAnalytics,
     hasRole,
     hasAnyRole,
     getRoleDisplayNames,
     login,
-    register,
     logout,
-    fetchProfile
+    fetchProfile,
+    initializeAuth
   }
 })

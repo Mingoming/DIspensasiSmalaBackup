@@ -15,12 +15,6 @@ const router = createRouter({
       meta: { guest: true }
     },
     {
-      path: '/register',
-      name: 'register',
-      component: () => import('../views/RegisterView.vue'),
-      meta: { guest: true }
-    },
-    {
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/DashboardView.vue'),
@@ -54,25 +48,31 @@ const router = createRouter({
       path: '/users',
       name: 'users',
       component: () => import('../views/UsersView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, adminOnly: true }
     },
     {
       path: '/users/create',
       name: 'users-create',
       component: () => import('../views/UsersCreateView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, adminOnly: true }
     },
     {
       path: '/users/:id/edit',
       name: 'users-edit',
       component: () => import('../views/UsersEditView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, adminOnly: true }
+    },
+    {
+      path: '/admin/master-data',
+      name: 'admin-master-data',
+      component: () => import('../views/AdminMasterDataView.vue'),
+      meta: { requiresAuth: true, adminOnly: true }
     },
     {
       path: '/analytics',
       name: 'analytics',
       component: () => import('../views/AnalyticsView.vue'),
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, analyticsOnly: true }
     },
     {
       path: '/profile',
@@ -95,14 +95,20 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
+
+  if (!authStore.initialized && authStore.token) {
+    await authStore.initializeAuth()
+  }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
   } else if (to.meta.guest && authStore.isAuthenticated) {
     next('/dashboard')
   } else if (to.meta.adminOnly && !authStore.isAdmin) {
+    next('/dashboard')
+  } else if (to.meta.analyticsOnly && !authStore.canViewAnalytics) {
     next('/dashboard')
   } else {
     next()

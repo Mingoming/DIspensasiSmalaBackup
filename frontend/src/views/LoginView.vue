@@ -112,7 +112,7 @@ async function handleLogin() {
               :type="showPassword ? 'text' : 'password'"
               required
               class="w-full pl-10 pr-11 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent outline-none transition"
-              placeholder="••••••••"
+              placeholder="********"
             />
             <button
               type="button"
@@ -146,16 +146,6 @@ async function handleLogin() {
           {{ loading ? 'Memproses...' : 'Masuk' }}
         </button>
       </form>
-
-      <!-- Register Link -->
-      <div class="mt-5 text-center">
-        <p class="text-sm text-gray-500">
-          Belum punya akun?
-          <router-link to="/register" class="text-primary-600 font-semibold hover:text-primary-700 hover:underline transition">
-            Daftar di sini
-          </router-link>
-        </p>
-      </div>
 
     </div>
   </div>

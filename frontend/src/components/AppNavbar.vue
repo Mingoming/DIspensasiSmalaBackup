@@ -88,7 +88,7 @@ function closeProfileDropdown() { profileDropdownOpen.value = false }
           </router-link>
 
           <router-link
-            v-if="authStore.canApprove"
+            v-if="authStore.canViewAnalytics"
             to="/analytics"
             class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition"
             active-class="bg-primary-50 text-primary-600"
@@ -109,6 +109,18 @@ function closeProfileDropdown() { profileDropdownOpen.value = false }
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
             Users
+          </router-link>
+
+          <router-link
+            v-if="authStore.isAdmin"
+            to="/admin/master-data"
+            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-600 transition"
+            active-class="bg-primary-50 text-primary-600"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+            </svg>
+            Master Data
           </router-link>
 
           <router-link
@@ -247,7 +259,7 @@ function closeProfileDropdown() { profileDropdownOpen.value = false }
           Dispensasi
         </router-link>
 
-        <router-link v-if="authStore.canApprove" to="/analytics" @click="mobileMenuOpen = false"
+        <router-link v-if="authStore.canViewAnalytics" to="/analytics" @click="mobileMenuOpen = false"
           class="flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition"
           active-class="bg-primary-50 text-primary-600">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,6 +275,15 @@ function closeProfileDropdown() { profileDropdownOpen.value = false }
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           Users
+        </router-link>
+
+        <router-link v-if="authStore.isAdmin" to="/admin/master-data" @click="mobileMenuOpen = false"
+          class="flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition"
+          active-class="bg-primary-50 text-primary-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+          Master Data
         </router-link>
 
         <router-link v-if="authStore.isAdmin" to="/audit-logs" @click="mobileMenuOpen = false"
