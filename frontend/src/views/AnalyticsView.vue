@@ -26,7 +26,7 @@ const topSiswa          = ref([])
 const dispensasiByMapel = ref([])
 const approvalRate      = ref({})
 
-if (!authStore.canApprove) {
+if (!authStore.canViewAnalytics) {
   router.push('/dashboard')
 }
 

@@ -1,20 +1,26 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useDispensasi } from '@/composables/useDispensasi'
 import { getStatusBadgeClass, getStatusText } from '@/utils/status'
 import { formatDateFull, formatDateShort } from '@/utils/date'
 import AppNavbar from '@/components/AppNavbar.vue'
+import api from '@/services/api'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const { dispensasiList, loading, fetchDispensasi } = useDispensasi()
 
 const stats = ref({ total: 0, pending: 0, approved: 0, rejected: 0 })
+const jadwalMengajar = ref([])
+const loadingJadwal = ref(false)
 
 const user = computed(() => authStore.user)
+const isGuruMapel = computed(() => authStore.hasRole('guru_mapel'))
+const todaySchedules = computed(() => {
+  const today = dayName(new Date())
+  return jadwalMengajar.value.filter(jadwal => jadwal.hari === today)
+})
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
@@ -33,9 +39,40 @@ const greetingIconType = computed(() => {
   return 'night'                    // bulan
 })
 
+const dayLabels = {
+  senin: 'Senin',
+  selasa: 'Selasa',
+  rabu: 'Rabu',
+  kamis: 'Kamis',
+  jumat: 'Jumat',
+  sabtu: 'Sabtu'
+}
+
+function dayName(date) {
+  return ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'][date.getDay()]
+}
+
+function dayLabel(day) {
+  return dayLabels[day] || day
+}
+
+async function fetchJadwalMengajar() {
+  if (!isGuruMapel.value) return
+
+  loadingJadwal.value = true
+  try {
+    const response = await api.get('/jadwal-mengajar')
+    jadwalMengajar.value = response.data.data
+  } catch (error) {
+    console.error('Error fetching jadwal mengajar:', error)
+  } finally {
+    loadingJadwal.value = false
+  }
+}
+
 onMounted(async () => {
   if (!authStore.user) await authStore.fetchProfile()
-  await fetchDispensasi()
+  await Promise.all([fetchDispensasi(), fetchJadwalMengajar()])
   stats.value.total    = dispensasiList.value.length
   stats.value.pending  = dispensasiList.value.filter(d => d.status === 'pending').length
   stats.value.approved = dispensasiList.value.filter(d => d.status === 'approved').length
@@ -178,6 +215,68 @@ onMounted(async () => {
           </div>
         </div>
 
+      </div>
+
+      <!-- Jadwal Guru Mapel -->
+      <div v-if="isGuruMapel" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+          <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M5 11h14M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Jadwal Mengajar
+          </h2>
+          <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">{{ jadwalMengajar.length }} Jadwal</span>
+        </div>
+
+        <div v-if="loadingJadwal" class="py-10 text-center">
+          <div class="inline-block animate-spin rounded-full h-7 w-7 border-b-2 border-primary-500 mb-3"></div>
+          <p class="text-sm text-gray-400">Memuat jadwal...</p>
+        </div>
+
+        <div v-else-if="jadwalMengajar.length === 0" class="py-10 text-center">
+          <p class="text-gray-600 font-medium">Belum ada jadwal mengajar</p>
+          <p class="text-gray-400 text-sm mt-1">Jadwal akan muncul setelah admin menambahkannya</p>
+        </div>
+
+        <div v-else class="p-6 space-y-5">
+          <div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Hari Ini</p>
+            <div v-if="todaySchedules.length === 0" class="text-sm text-gray-500 bg-gray-50 rounded-lg px-4 py-3">
+              Tidak ada jadwal mengajar hari ini.
+            </div>
+            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div v-for="jadwal in todaySchedules" :key="jadwal.id" class="border border-primary-100 bg-primary-50/50 rounded-lg p-4">
+                <p class="text-sm font-semibold text-gray-800">{{ jadwal.mata_pelajaran?.nama || '-' }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ jadwal.kelas?.nama_kelas || '-' }} · Jam {{ jadwal.jam_pelajaran_mulai }}-{{ jadwal.jam_pelajaran_selesai }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Semua Jadwal</p>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-100">
+                <thead class="bg-gray-50/70">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hari</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jam</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelas</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mata Pelajaran</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr v-for="jadwal in jadwalMengajar" :key="jadwal.id">
+                    <td class="px-4 py-3 text-sm font-medium text-gray-800">{{ dayLabel(jadwal.hari) }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">Jam {{ jadwal.jam_pelajaran_mulai }}-{{ jadwal.jam_pelajaran_selesai }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ jadwal.kelas?.nama_kelas || '-' }}</td>
+                    <td class="px-4 py-3 text-sm text-gray-600">{{ jadwal.mata_pelajaran?.nama || '-' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Quick Actions -->
