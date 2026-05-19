@@ -19,6 +19,34 @@ if (!authStore.isAdmin) {
   router.push('/dashboard')
 }
 
+function getRoleLabel(role) {
+  const labels = {
+    siswa: 'Siswa',
+    guru: 'Guru',
+    kesiswaan: 'Kesiswaan',
+    admin: 'Admin'
+  }
+
+  return labels[role] || role
+}
+
+function getAccessLabels(item) {
+  const labels = {
+    guru_mapel: 'Guru Mapel',
+    admin: 'Admin',
+    kesiswaan: 'Kesiswaan'
+  }
+  const primaryAccess = {
+    guru: 'guru_mapel',
+    admin: 'admin',
+    kesiswaan: 'kesiswaan'
+  }
+
+  return item.roles
+    ?.filter(role => role.name !== primaryAccess[item.role])
+    .map(role => labels[role.name] || role.display_name || role.name) || []
+}
+
 async function fetchStats() {
   try {
     const response = await api.get('/users/statistics')
@@ -64,6 +92,7 @@ function getAvatarColor(role) {
   const colors = {
     siswa: 'bg-blue-100 text-blue-600',
     guru:  'bg-green-100 text-green-600',
+    kesiswaan: 'bg-purple-100 text-purple-600',
     admin: 'bg-amber-100 text-amber-600'
   }
   return colors[role] || 'bg-gray-100 text-gray-600'
@@ -231,6 +260,7 @@ onMounted(() => {
               <option value="all">Semua Role</option>
               <option value="siswa">Siswa</option>
               <option value="guru">Guru</option>
+              <option value="kesiswaan">Kesiswaan</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -310,21 +340,22 @@ onMounted(() => {
                 <td class="px-5 py-4 whitespace-nowrap">
                   <div class="flex flex-wrap gap-1">
                     <span
-                      class="px-2.5 py-1 text-xs font-semibold rounded-full border capitalize"
+                      class="px-2.5 py-1 text-xs font-semibold rounded-full border"
                       :class="{
-                        'bg-blue-100 text-blue-800 border-blue-200':   item.role === 'siswa',
+                        'bg-blue-100 text-blue-800 border-blue-200': item.role === 'siswa',
                         'bg-green-100 text-green-800 border-green-200': item.role === 'guru',
+                        'bg-purple-100 text-purple-800 border-purple-200': item.role === 'kesiswaan',
                         'bg-amber-100 text-amber-800 border-amber-200': item.role === 'admin'
                       }"
                     >
-                      {{ item.role }}
+                      {{ getRoleLabel(item.role) }}
                     </span>
                     <span
-                      v-for="role in item.roles"
-                      :key="role.id"
-                      class="px-2.5 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 border border-purple-200"
+                      v-for="label in getAccessLabels(item)"
+                      :key="`${item.id}-${label}`"
+                      class="px-2.5 py-1 text-xs font-semibold rounded-full border bg-gray-100 text-gray-700 border-gray-200"
                     >
-                      {{ role.display_name }}
+                      {{ label }}
                     </span>
                   </div>
                 </td>

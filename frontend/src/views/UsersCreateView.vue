@@ -22,18 +22,19 @@ const form = ref({
 })
 
 const kelasList = ref([])
-const rolesList = ref([])
 const loading = ref(false)
 const error = ref('')
 const showPassword = ref(false)
 
+const roleOptions = [
+  { value: 'guru_mapel', label: 'Guru Mapel' },
+  { value: 'admin', label: 'Admin' },
+  { value: 'kesiswaan', label: 'Kesiswaan' }
+]
+
 if (!authStore.isAdmin) {
   router.push('/dashboard')
 }
-
-watch(() => form.value.role, (newRole) => {
-  if (newRole !== 'guru') form.value.roles = []
-})
 
 async function fetchKelas() {
   try {
@@ -44,20 +45,15 @@ async function fetchKelas() {
   }
 }
 
-async function fetchRoles() {
-  try {
-    const response = await api.get('/roles')
-    rolesList.value = response.data.data
-  } catch (err) {
-    console.error('Error fetching roles:', err)
-  }
-}
-
 async function handleSubmit() {
   error.value = ''
   loading.value = true
   try {
-    await api.post('/users', form.value)
+    const payload = { ...form.value }
+    if (payload.role === 'siswa') {
+      payload.roles = []
+    }
+    await api.post('/users', payload)
     alert('User berhasil ditambahkan!')
     router.push('/users')
   } catch (err) {
@@ -70,9 +66,35 @@ async function handleSubmit() {
   }
 }
 
+watch(
+  () => form.value.role,
+  (role) => {
+    if (role === 'siswa') {
+      form.value.roles = []
+      form.value.nip = ''
+      form.value.mata_pelajaran = ''
+      return
+    }
+
+    form.value.nisn = ''
+    form.value.kelas_id = ''
+    const defaultRoles = {
+      guru: 'guru_mapel',
+      admin: 'admin',
+      kesiswaan: 'kesiswaan'
+    }
+    const defaultRole = defaultRoles[role]
+
+    if (defaultRole && !form.value.roles.includes(defaultRole)) {
+      form.value.roles = [...form.value.roles, defaultRole]
+    }
+  },
+  { immediate: true }
+)
+
 onMounted(() => {
   fetchKelas()
-  fetchRoles()
+  // fetchRoles()
 })
 </script>
 
@@ -193,11 +215,32 @@ onMounted(() => {
                       >
                         <option value="siswa">Siswa</option>
                         <option value="guru">Guru</option>
+                        <option value="kesiswaan">Kesiswaan</option>
                         <option value="admin">Admin</option>
                       </select>
                     </div>
-                  </div>
                 </div>
+              </div>
+              <div v-if="form.role !== 'siswa'" class="mt-4">
+                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                  Hak Akses
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <label
+                    v-for="option in roleOptions"
+                    :key="option.value"
+                    class="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700"
+                  >
+                    <input
+                      v-model="form.roles"
+                      type="checkbox"
+                      :value="option.value"
+                      class="rounded border-gray-300 text-primary-500 focus:ring-primary-400"
+                    />
+                    {{ option.label }}
+                  </label>
+                </div>
+              </div>
 
                 <!-- Password -->
                 <div>
@@ -297,7 +340,7 @@ onMounted(() => {
             </div>
 
             <!-- ── SECTION: Data Guru/Admin ── -->
-            <div v-if="form.role === 'guru' || form.role === 'admin'" class="border-t border-gray-100 pt-5">
+            <div v-if="form.role === 'guru' || form.role === 'admin' || form.role === 'kesiswaan'" class="border-t border-gray-100 pt-5">
               <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -328,36 +371,6 @@ onMounted(() => {
                     placeholder="Contoh: Matematika"
                   />
                 </div>
-              </div>
-            </div>
-
-            <!-- ── SECTION: Role Tambahan ── -->
-            <div v-if="(form.role === 'guru' || form.role === 'admin') && rolesList.length > 0" class="bg-primary-50 border border-primary-100 rounded-xl p-4">
-              <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                <svg class="w-3.5 h-3.5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                Role Tambahan <span class="text-gray-400 normal-case font-normal text-xs">(opsional)</span>
-              </h2>
-              <div class="space-y-2">
-                <label
-                  v-for="role in rolesList"
-                  :key="role.id"
-                  :for="`role-${role.id}`"
-                  class="flex items-start gap-3 p-3 bg-white rounded-lg border border-primary-100 hover:border-primary-300 cursor-pointer transition"
-                >
-                  <input
-                    :id="`role-${role.id}`"
-                    type="checkbox"
-                    :value="role.name"
-                    v-model="form.roles"
-                    class="mt-0.5 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                  />
-                  <div>
-                    <p class="text-sm font-semibold text-gray-700">{{ role.display_name }}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">{{ role.description }}</p>
-                  </div>
-                </label>
               </div>
             </div>
 
